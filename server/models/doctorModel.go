@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
@@ -16,7 +14,7 @@ type Doctor struct {
 	Direccion        string       `gorm:"type:varchar(100)"`
 	Email            string       `gorm:"not null; type:varchar(40)"`
 	Telefono         string       `gorm:"not null; type:varchar(12)"`
-	FechaNacimiento  time.Time    `gorm:"not null; type:date"`
+	FechaNacimiento  string       `gorm:"not null; type:date"`
 	EspecialidadId   uint         `gorm:"not null"` // foreign key
 	Especialidad     Especialidad `gorm:"not null; foreignkey:EspecialidadId"`
 	Genero           string       `gorm:"not null; type:enum('masculino','femenino')"`

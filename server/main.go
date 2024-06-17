@@ -1,28 +1,26 @@
 package main
 
 import (
-	"github.com/asterfy/tis-clinic/controllers"
 	"github.com/asterfy/tis-clinic/initializers"
-	"github.com/gin-contrib/cors"
+	"github.com/asterfy/tis-clinic/routes"
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
+	// Inicializar la conexión a la base de datos
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDB()
 }
 
 func main() {
-	r := gin.Default()
+	// Crear un enrutador Gin
+	router := gin.Default()
 
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:5173"}
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-	r.Use(cors.New(config))
+	// Configurar las rutas
+	routes.SetupRoutes(router)
 
-	r.POST("/clinic/api/auth/", controllers.ValidateLogin)
-
-	r.Run()
+	// Iniciar el servidor Gin
+	router.Run(":8080")
 }
 
 // REQUISITOS FUNCIONALES

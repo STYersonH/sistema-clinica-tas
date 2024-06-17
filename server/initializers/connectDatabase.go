@@ -2,8 +2,6 @@ package initializers
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -13,38 +11,44 @@ var DB *gorm.DB
 
 func craftDSNs() (string, string) {
 	//Obtener las variables de entorno
-	db_name := os.Getenv("DB_NAME")
-	db_user := os.Getenv("DB_USER")
-	db_password := os.Getenv("DB_PASSWORD")
-	db_host := os.Getenv("DB_HOST")
-	db_port := os.Getenv("DB_PORT")
-
+	db_name := "clinic_db"
+	db_user := "root"
+	db_password := "48770660"
+	db_host := "127.0.0.1"
+	db_port := "3307"
+	// fmt.Printf("DB_HOST: %s, DB_PORT: %s\n", db_host, db_port)
 	//Construir las cadenas de conexión
 	connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/", db_user, db_password, db_host, db_port)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", db_user, db_password, db_host, db_port, db_name)
 
 	return connection, dsn
 }
-
-func ConnectToDB() {
+func ConnectToDB() error {
 	connection, dsn := craftDSNs()
 
-	//Crear base de datos de ser necesaro
+	// Imprimir las cadenas de conexión para depuración
+	fmt.Println("Connection:", connection)
+	fmt.Println("DSN:", dsn)
+
+	// Crear una instancia de GORM para conectar a MySQL
 	db, err := gorm.Open(mysql.Open(connection), &gorm.Config{})
-
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error al abrir la conexión a MySQL: %w", err)
 	}
 
-	createDatabaseCommand := "CREATE DATABASE IF NOT EXISTS " + os.Getenv("DB_NAME") + ";"
-	db.Exec(createDatabaseCommand)
+	// Crear la base de datos si no existe
+	createDatabaseCommand := "CREATE DATABASE IF NOT EXISTS " + "clinic_db" + ";"
 
-	//Conectar con la base de datos
+	if err := db.Exec(createDatabaseCommand).Error; err != nil {
+		return fmt.Errorf("error al crear la base de datos: %w", err)
+	}
+
+	// Conectar a la base de datos especificada
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
 	if err != nil {
-		log.Fatal("Error al conectar con la base de datos")
-	} else {
-		DB = db
+		return fmt.Errorf("error al conectar a la base de datos: %w", err)
 	}
+
+	DB = db
+	return nil
 }

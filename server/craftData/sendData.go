@@ -75,7 +75,7 @@ func CrearDoctores(n int) {
 		doctor.Email = faker.Email()
 		doctor.Direccion = ""
 		doctor.Telefono = faker.Phonenumber()[:9]
-		doctor.EspecialidadId = uint(rand.Intn(19) + 1) // 1-19
+		doctor.EspecialidadId = uint(rand.Intn(9) + 1) // 1-9
 		doctor.FechaNacimiento = faker.Date()
 
 		//Guardar paciente
@@ -142,12 +142,14 @@ func CrearSeguros() {
 
 	seguro.TipoSeguro = "estandar"
 	seguro.Precio = 200.0
+	seguro.ID = 2
 	if result := initializers.DB.Create(&seguro); result.Error != nil {
 		fmt.Println("Error al guardar seguro")
 	}
 
 	seguro.TipoSeguro = "premiun"
 	seguro.Precio = 300.0
+	seguro.ID = 3
 	if result := initializers.DB.Create(&seguro); result.Error != nil {
 		fmt.Println("Error al guardar seguro")
 	}

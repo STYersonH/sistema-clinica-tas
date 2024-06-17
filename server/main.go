@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/asterfy/tis-clinic/initializers"
 	"github.com/asterfy/tis-clinic/routes"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,6 +16,11 @@ func init() {
 func main() {
 	// Crear un enrutador Gin
 	router := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:5173"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	router.Use(cors.New(config))
 
 	// Configurar las rutas
 	routes.SetupRoutes(router)

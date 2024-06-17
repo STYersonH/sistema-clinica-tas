@@ -60,10 +60,10 @@ func SetupRoutes(router *gin.Engine) {
 	pacientes := router.Group("/pacientes")
 	{
 		pacientes.GET("/", controllers.GetAllPatients)
-		pacientes.GET("/:id", controllers.GetPatient)
+		pacientes.GET("/:id/", controllers.GetPatient)
 		pacientes.POST("/", controllers.CreatePatient)
-		pacientes.PUT("/:id", controllers.UpdatePatient)
-		pacientes.DELETE("/:id", controllers.DeletePatient)
+		pacientes.PUT("/:id/", controllers.UpdatePatient)
+		pacientes.DELETE("/:id/", controllers.DeletePatient)
 	}
 	recetasdetail := router.Group("/recetasdetail")
 	{

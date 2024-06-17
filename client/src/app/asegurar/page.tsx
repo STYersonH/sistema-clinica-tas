@@ -43,8 +43,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
-  tipoSeguro: z.string(),
-  cantAniosSeguro: z.string(),
+  tipoSeguro: z.string().min(1, "Por favor seleccione un tipo de seguro"),
+  cantAniosSeguro: z
+    .string()
+    .min(1, "Por favor seleccione la cantidad de años"),
 });
 
 const AsegurarPage = () => {
@@ -153,9 +155,9 @@ const AsegurarPage = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="1-anio">1 año</SelectItem>
-                          <SelectItem value="2-anio">2 años</SelectItem>
-                          <SelectItem value="3-anio">3 años</SelectItem>
+                          <SelectItem value="1">1 año</SelectItem>
+                          <SelectItem value="2">2 años</SelectItem>
+                          <SelectItem value="3">3 años</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -171,7 +173,15 @@ const AsegurarPage = () => {
               <Button
                 type="submit"
                 className="rounded-3xl bg-green-500 px-16 py-7 font-bold hover:bg-green-600"
-                onClick={() => setProcedido(true)}
+                onClick={() => {
+                  if (cantAniosSeguro && tipoSeguro) {
+                    setProcedido(true);
+                  } else {
+                    alert(
+                      "Por favor seleccion el tipo de seguro y la cantidad de años que desea.",
+                    );
+                  }
+                }}
               >
                 Proceder
               </Button>
@@ -181,14 +191,38 @@ const AsegurarPage = () => {
           {/* mostrar como un comprobante de pago antes mostrando el precio por un anio y luego por 3 anios y despues el total */}
 
           {procedido && (
-            <div className="flex flex-col items-center rounded-3xl bg-gray-200">
-              <h2 className="text-3xl">Boleta a pagar</h2>
-              <div>
-                <p>
-                  Seguro de salud <span>{tipoSeguro}</span>
-                </p>
+            <>
+              <div className="flex w-full flex-col items-center rounded-3xl bg-gray-200 py-10">
+                <h2 className="mb-10 text-3xl">Boleta a pagar</h2>
+                <div className="flex w-full justify-around">
+                  <p className="text-xl">
+                    Seguro de salud{" "}
+                    <span className="font-bold">{tipoSeguro}</span>
+                  </p>
+                  <p className="text-xl font-bold">S/.200</p>
+                </div>
+                {/* crear una linea separadora */}
+                <div className="mx-4 my-4 h-[2px] w-[70%] bg-gray-400 text-gray-500" />
+                <div className="flex w-full justify-around gap-16">
+                  <p className="text-xl">
+                    Total por{" "}
+                    <span className="font-bold">{cantAniosSeguro} año(s)</span>
+                  </p>
+                  <p className="text-xl font-bold">
+                    S/.{200 * Number(cantAniosSeguro)}
+                  </p>
+                </div>
               </div>
-            </div>
+              <div className="flex w-full justify-center">
+                <Button
+                  type="submit"
+                  className="mx-auto rounded-3xl bg-green-500 px-16 py-7 font-bold hover:bg-green-600"
+                  onClick={() => setProcedido(true)}
+                >
+                  Obtener seguro
+                </Button>
+              </div>
+            </>
           )}
         </form>
       </Form>

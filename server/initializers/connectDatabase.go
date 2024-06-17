@@ -2,7 +2,6 @@ package initializers
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"gorm.io/driver/mysql"
@@ -25,26 +24,28 @@ func craftDSNs() (string, string) {
 
 	return connection, dsn
 }
-
-func ConnectToDB() {
+func ConnectToDB() error {
 	connection, dsn := craftDSNs()
 
-	//Crear base de datos de ser necesaro
+	// Crear una instancia de GORM para conectar a MySQL
 	db, err := gorm.Open(mysql.Open(connection), &gorm.Config{})
-
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("error al abrir la conexión a MySQL: %w", err)
 	}
 
-	createDatabaseCommand := "CREATE DATABASE IF NOT EXISTS " + os.Getenv("DB_NAME") + ";"
-	db.Exec(createDatabaseCommand)
+	// Crear la base de datos si no existe
+	createDatabaseCommand := "CREATE DATABASE IF NOT EXISTS " + "clinic_db" + ";"
 
-	//Conectar con la base de datos
+	if err := db.Exec(createDatabaseCommand).Error; err != nil {
+		return fmt.Errorf("error al crear la base de datos: %w", err)
+	}
+
+	// Conectar a la base de datos especificada
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
 	if err != nil {
-		log.Fatal("Error al conectar con la base de datos")
-	} else {
-		DB = db
+		return fmt.Errorf("error al conectar a la base de datos: %w", err)
 	}
+
+	DB = db
+	return nil
 }

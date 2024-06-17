@@ -97,5 +97,15 @@ func SetupRoutes(router *gin.Engine) {
 		tratamientos.PUT("/:id", controllers.UpdateTratamiento)
 		tratamientos.DELETE("/:id", controllers.DeleteTratamiento)
 	}
+	auth := router.Group("/auth")
+	{
+		auth.POST("/", controllers.ValidateLogin)
+	}
+	usuarios := router.Group("/usuarios")
+	{
+		usuarios.GET("/", controllers.GetUsers)
+		usuarios.GET("/:id", controllers.GetUser)
+		usuarios.POST("/", controllers.CreateUser)
+	}
 
 }

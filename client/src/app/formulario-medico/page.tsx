@@ -41,7 +41,6 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 
 const formSchema = z.object({
-  username: z.string().min(2).max(50),
   nombres: z.string().min(2).max(50),
   apellidos: z.string().min(2).max(50),
   DNI: z.string().min(8).max(8),
@@ -68,7 +67,6 @@ const FormMedico = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
       nombres: "",
       apellidos: "",
       DNI: "",

@@ -3,9 +3,10 @@
 import React from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import {
   Form,
   FormControl,
@@ -25,12 +26,6 @@ import {
 } from "@/components/ui/select";
 
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -39,9 +34,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useRouter, useSearchParams } from "next/navigation";
+import { postPaciente } from "../apiRoutes/pacientes/pacientesApi";
 
 const formSchema = z.object({
-  username: z.string().min(2).max(50),
   nombres: z.string().min(2).max(50),
   apellidos: z.string().min(2).max(50),
   DNI: z.string().min(8).max(8),
@@ -56,18 +51,12 @@ const formSchema = z.object({
 });
 
 const FormCrearCuenta = () => {
-  const searchParams = useSearchParams();
   const router = useRouter();
-
-  // Obtener el valor del parametro tipo
-  const tipo = searchParams.get("tipo");
-  console.log(tipo);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
       nombres: "",
       apellidos: "",
       DNI: "",
@@ -83,11 +72,45 @@ const FormCrearCuenta = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    console.log(values);
+
+    // obtener apellido paterno y materno
+    const apellidos = values.apellidos.split(" ");
+
+    // obtener fecha de nacimiento
+    const fechaNacimiento = `${values.anioBirthDate}-${values.mesBirthDate}-${values.diaBirthDate}`;
+
+    const data = {
+      DNI: values.DNI,
+      nombres: values.nombres,
+      apellido_paterno: apellidos[0],
+      apellido_materno: apellidos[1],
+      genero: values.genero,
+      direccion: values.direccionVivienda,
+      telefono: values.nroCelular,
+      ocupacion: values.ocupacion,
+      fechaNacimiento: fechaNacimiento, // anio mes dia
+    };
+
+    const res = await postPaciente(data);
+
+    console.log(res.status);
+
+    if (res.status === 201) {
+      console.log("Paciente registrado correctamente");
+      console.log(res.data);
+    } else {
+      console.log("Error al registrar paciente");
+      console.log(res.data);
+    }
   }
+
+  const handleS = (e: any) => {
+    e.preventDefault();
+    console.log("enviando...  ");
+  };
 
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-yellow-500">
@@ -108,6 +131,7 @@ const FormCrearCuenta = () => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
+          //onSubmit={handleS}
           className="w-[1200px] space-y-8 rounded-3xl border-2 border-solid bg-white p-10"
         >
           {/* nombres y apellidos */}
@@ -176,20 +200,18 @@ const FormCrearCuenta = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Enero">Enero</SelectItem>
-                            <SelectItem value="Febrero">Febrero</SelectItem>
-                            <SelectItem value="Marzo">Marzo</SelectItem>
-                            <SelectItem value="Abril">Abril</SelectItem>
-                            <SelectItem value="Mayo">Mayo</SelectItem>
-                            <SelectItem value="Junio">Junio</SelectItem>
-                            <SelectItem value="Julio">Julio</SelectItem>
-                            <SelectItem value="Agosto">Agosto</SelectItem>
-                            <SelectItem value="Septiembre">
-                              Septiembre
-                            </SelectItem>
-                            <SelectItem value="Octubre">Octubre</SelectItem>
-                            <SelectItem value="Noviembre">Noviembre</SelectItem>
-                            <SelectItem value="Diciembre">Diciembre</SelectItem>
+                            <SelectItem value="01">Enero</SelectItem>
+                            <SelectItem value="02">Febrero</SelectItem>
+                            <SelectItem value="03">Marzo</SelectItem>
+                            <SelectItem value="04">Abril</SelectItem>
+                            <SelectItem value="05">Mayo</SelectItem>
+                            <SelectItem value="06">Junio</SelectItem>
+                            <SelectItem value="07">Julio</SelectItem>
+                            <SelectItem value="08">Agosto</SelectItem>
+                            <SelectItem value="09">Septiembre</SelectItem>
+                            <SelectItem value="10">Octubre</SelectItem>
+                            <SelectItem value="11">Noviembre</SelectItem>
+                            <SelectItem value="12">Diciembre</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

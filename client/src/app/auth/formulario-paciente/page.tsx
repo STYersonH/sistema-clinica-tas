@@ -3,9 +3,10 @@
 import React from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import {
   Form,
   FormControl,
@@ -25,30 +26,27 @@ import {
 } from "@/components/ui/select";
 
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-
 import { useRouter, useSearchParams } from "next/navigation";
-import { postMedico } from "../apiRoutes/medicos/pacientesApi";
+import { postPaciente } from "../../apiRoutes/pacientes/pacientesApi";
 
 const formSchema = z.object({
   nombres: z.string().min(2).max(50),
   apellidos: z.string().min(2).max(50),
   DNI: z.string().min(8).max(8),
   genero: z.string().optional(),
-  numeroLiscencia: z.string().min(8).max(8),
+  direccionVivienda: z.string().min(2).max(50),
   diaBirthDate: z.string().optional(),
   mesBirthDate: z.string().optional(),
   anioBirthDate: z.string().optional(),
   nroCelular: z.string().min(9).max(9),
-  email: z.string().email(),
-  especialidad: z.string().optional(),
-  direccionVivienda: z.string().min(2).max(50),
+  email: z.string().email(), // no obligatorio
+  ocupacion: z.string().optional(),
 });
 
-const FormMedico = () => {
+const FormCrearCuenta = () => {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -60,18 +58,15 @@ const FormMedico = () => {
       apellidos: "",
       DNI: "",
       genero: "",
-      numeroLiscencia: "",
+      direccionVivienda: "",
       diaBirthDate: "",
       mesBirthDate: "",
       anioBirthDate: "",
       nroCelular: "",
       email: "",
-      especialidad: "",
-      direccionVivienda: "",
+      ocupacion: "",
     },
   });
-
-  //TODO: Obtener las especialidades para mostrar en el formulario
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -83,19 +78,17 @@ const FormMedico = () => {
 
     const data = {
       DNI: values.DNI,
-      numero_liscencia: values.numeroLiscencia,
       nombres: values.nombres,
       apellido_paterno: apellidos[0],
       apellido_materno: apellidos[1],
       genero: values.genero,
-      email: values.email,
       direccion: values.direccionVivienda,
       telefono: values.nroCelular,
+      ocupacion: values.ocupacion,
       fechaNacimiento: fechaNacimiento, // anio mes dia
-      especialidad_id: values.especialidad,
     };
 
-    const res = await postMedico(data);
+    const res = await postPaciente(data);
 
     console.log(res.status);
 
@@ -103,7 +96,7 @@ const FormMedico = () => {
       //console.log(res.data);
       toast({
         title: "Paciente creado correctamente",
-        description: `Su usuario y contraseña son "${values.DNI}", puede actualizar su contraseña en la seccion de perfil.`,
+        description: `Su usuario y contraseña son "${values.DNI}".`, //TODO en cuanto se pueda actualizar al paciente, colocar eso en este mensaje
       });
     } else {
       toast({
@@ -115,24 +108,25 @@ const FormMedico = () => {
   }
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-blue-primary">
+    <div className="flex h-screen flex-col items-center justify-center bg-yellow-500">
       <div
         className="flex gap-6"
         onClick={() => {
           router.push("/");
         }}
       >
-        <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-blue-primary">
+        <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
           <FaAngleLeft className="transition-transform duration-200 group-hover:scale-125" />
         </div>
-        <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-blue-primary">
-          Creacion de cuenta para medico
+        <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
+          Creacion de cuenta para paciente
         </h2>
       </div>
 
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
+          //onSubmit={handleS}
           className="w-[1200px] space-y-8 rounded-3xl border-2 border-solid bg-white p-10"
         >
           {/* nombres y apellidos */}
@@ -235,20 +229,18 @@ const FormMedico = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Enero">Enero</SelectItem>
-                            <SelectItem value="Febrero">Febrero</SelectItem>
-                            <SelectItem value="Marzo">Marzo</SelectItem>
-                            <SelectItem value="Abril">Abril</SelectItem>
-                            <SelectItem value="Mayo">Mayo</SelectItem>
-                            <SelectItem value="Junio">Junio</SelectItem>
-                            <SelectItem value="Julio">Julio</SelectItem>
-                            <SelectItem value="Agosto">Agosto</SelectItem>
-                            <SelectItem value="Septiembre">
-                              Septiembre
-                            </SelectItem>
-                            <SelectItem value="Octubre">Octubre</SelectItem>
-                            <SelectItem value="Noviembre">Noviembre</SelectItem>
-                            <SelectItem value="Diciembre">Diciembre</SelectItem>
+                            <SelectItem value="01">Enero</SelectItem>
+                            <SelectItem value="02">Febrero</SelectItem>
+                            <SelectItem value="03">Marzo</SelectItem>
+                            <SelectItem value="04">Abril</SelectItem>
+                            <SelectItem value="05">Mayo</SelectItem>
+                            <SelectItem value="06">Junio</SelectItem>
+                            <SelectItem value="07">Julio</SelectItem>
+                            <SelectItem value="08">Agosto</SelectItem>
+                            <SelectItem value="09">Septiembre</SelectItem>
+                            <SelectItem value="10">Octubre</SelectItem>
+                            <SelectItem value="11">Noviembre</SelectItem>
+                            <SelectItem value="12">Diciembre</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -386,7 +378,7 @@ const FormMedico = () => {
             </div>
           </div>
 
-          {/*Direccion de vivienda, Nro de Liscencia y Especialidad*/}
+          {/*Nro de Liscencia y Especialidad*/}
           <div className="flex gap-6">
             <div className="flex-1">
               <FormField
@@ -408,58 +400,24 @@ const FormMedico = () => {
               />
             </div>
 
-            <div className="flex flex-1 gap-4">
-              <div className="flex-1">
-                <FormField
-                  control={form.control}
-                  name="numeroLiscencia"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Numero de liscencia</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="numero de liscencia"
-                          {...field}
-                          className=""
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="flex-1">
-                <FormField
-                  control={form.control}
-                  name="especialidad"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Especialidad</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar especialidad" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="General">General</SelectItem>
-                          <SelectItem value="Traumatologia">
-                            Traumatologia
-                          </SelectItem>
-                          <SelectItem value="Dermatologia">
-                            Dermatologia
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <div className="flex-1">
+              <FormField
+                control={form.control}
+                name="ocupacion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ocupacion</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Escribir su ocupacion"
+                        {...field}
+                        className=""
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
 
@@ -477,4 +435,4 @@ const FormMedico = () => {
   );
 };
 
-export default FormMedico;
+export default FormCrearCuenta;

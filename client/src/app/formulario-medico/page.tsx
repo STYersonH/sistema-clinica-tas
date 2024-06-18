@@ -25,20 +25,13 @@ import {
 } from "@/components/ui/select";
 
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useRouter, useSearchParams } from "next/navigation";
+import { postMedico } from "../apiRoutes/medicos/pacientesApi";
 
 const formSchema = z.object({
   nombres: z.string().min(2).max(50),
@@ -57,11 +50,7 @@ const formSchema = z.object({
 
 const FormMedico = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  // Obtener el valor del parametro tipo
-  const tipo = searchParams.get("tipo");
-  console.log(tipo);
+  const { toast } = useToast();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -82,11 +71,47 @@ const FormMedico = () => {
     },
   });
 
+  //TODO: Obtener las especialidades para mostrar en el formulario
+
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    // obtener apellido paterno y materno
+    const apellidos = values.apellidos.split(" ");
+
+    // obtener fecha de nacimiento
+    const fechaNacimiento = `${values.anioBirthDate}-${values.mesBirthDate}-${values.diaBirthDate}`;
+
+    const data = {
+      DNI: values.DNI,
+      numero_liscencia: values.numeroLiscencia,
+      nombres: values.nombres,
+      apellido_paterno: apellidos[0],
+      apellido_materno: apellidos[1],
+      genero: values.genero,
+      email: values.email,
+      direccion: values.direccionVivienda,
+      telefono: values.nroCelular,
+      fechaNacimiento: fechaNacimiento, // anio mes dia
+      especialidad_id: values.especialidad,
+    };
+
+    const res = await postMedico(data);
+
+    console.log(res.status);
+
+    if (res.status === 201) {
+      //console.log(res.data);
+      toast({
+        title: "Paciente creado correctamente",
+        description: `Su usuario y contraseña son "${values.DNI}", puede actualizar su contraseña en la seccion de perfil.`,
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Se produjo un error al crear el paciente",
+        description: "Intente nuevamente.",
+      });
+    }
   }
 
   return (
@@ -158,8 +183,42 @@ const FormMedico = () => {
             <div className="flex flex-1 flex-col gap-3 pt-1">
               <FormLabel>Fecha de nacimiento</FormLabel>
               <div className="flex w-full gap-2">
+                {/* Year */}
+                <div className="flex-1">
+                  <FormField
+                    control={form.control}
+                    name="anioBirthDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        {/*<FormLabel>Dia</FormLabel>*/}
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="año" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Array.from(
+                              { length: 125 },
+                              (_, i) => 2024 - i,
+                            ).map((year) => (
+                              <SelectItem key={`${year}`} value={`${year}`}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 {/* Month */}
-                <div className="w-[50%]">
+                <div className="flex-1">
                   <FormField
                     control={form.control}
                     name="mesBirthDate"
@@ -199,7 +258,7 @@ const FormMedico = () => {
                 </div>
 
                 {/* Day */}
-                <div className="w-[25%]">
+                <div className="flex-1">
                   <FormField
                     control={form.control}
                     name="diaBirthDate"
@@ -223,40 +282,6 @@ const FormMedico = () => {
                                 </SelectItem>
                               ),
                             )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Year */}
-                <div className="w-[25%]">
-                  <FormField
-                    control={form.control}
-                    name="anioBirthDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        {/*<FormLabel>Dia</FormLabel>*/}
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="año" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Array.from(
-                              { length: 125 },
-                              (_, i) => 2024 - i,
-                            ).map((year) => (
-                              <SelectItem key={`${year}`} value={`${year}`}>
-                                {year}
-                              </SelectItem>
-                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />

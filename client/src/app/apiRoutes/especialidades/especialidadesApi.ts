@@ -4,4 +4,4 @@ const documentApi = axios.create({
   baseURL: "http://localhost:8080/",
 });
 
-export const login = (data: any) => documentApi.post("auth/", data);
+export const getUsers = () => documentApi.get("especialidades/");

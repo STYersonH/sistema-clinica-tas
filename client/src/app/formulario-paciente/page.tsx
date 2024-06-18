@@ -29,11 +29,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useRouter, useSearchParams } from "next/navigation";
 import { postPaciente } from "../apiRoutes/pacientes/pacientesApi";
 
@@ -47,7 +42,7 @@ const formSchema = z.object({
   mesBirthDate: z.string().optional(),
   anioBirthDate: z.string().optional(),
   nroCelular: z.string().min(9).max(9),
-  email: z.string().email(),
+  email: z.string().email(), // no obligatorio
   ocupacion: z.string().optional(),
 });
 
@@ -75,9 +70,6 @@ const FormCrearCuenta = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-
     // obtener apellido paterno y materno
     const apellidos = values.apellidos.split(" ");
 
@@ -190,8 +182,42 @@ const FormCrearCuenta = () => {
             <div className="flex flex-1 flex-col gap-3 pt-1">
               <FormLabel>Fecha de nacimiento</FormLabel>
               <div className="flex w-full gap-2">
+                {/* Year */}
+                <div className="flex-1">
+                  <FormField
+                    control={form.control}
+                    name="anioBirthDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        {/*<FormLabel>Dia</FormLabel>*/}
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="año" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Array.from(
+                              { length: 125 },
+                              (_, i) => 2024 - i,
+                            ).map((year) => (
+                              <SelectItem key={`${year}`} value={`${year}`}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 {/* Month */}
-                <div className="w-[50%]">
+                <div className="flex-1">
                   <FormField
                     control={form.control}
                     name="mesBirthDate"
@@ -229,7 +255,7 @@ const FormCrearCuenta = () => {
                 </div>
 
                 {/* Day */}
-                <div className="w-[25%]">
+                <div className="flex-1">
                   <FormField
                     control={form.control}
                     name="diaBirthDate"
@@ -253,40 +279,6 @@ const FormCrearCuenta = () => {
                                 </SelectItem>
                               ),
                             )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Year */}
-                <div className="w-[25%]">
-                  <FormField
-                    control={form.control}
-                    name="anioBirthDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        {/*<FormLabel>Dia</FormLabel>*/}
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="año" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Array.from(
-                              { length: 125 },
-                              (_, i) => 2024 - i,
-                            ).map((year) => (
-                              <SelectItem key={`${year}`} value={`${year}`}>
-                                {year}
-                              </SelectItem>
-                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />

@@ -27,6 +27,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 import {
   Popover,
@@ -52,6 +53,7 @@ const formSchema = z.object({
 
 const FormCrearCuenta = () => {
   const router = useRouter();
+  const { toast } = useToast();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -99,11 +101,17 @@ const FormCrearCuenta = () => {
     console.log(res.status);
 
     if (res.status === 201) {
-      console.log("Paciente registrado correctamente");
-      console.log(res.data);
+      //console.log(res.data);
+      toast({
+        title: "Paciente creado correctamente",
+        description: `Su usuario y contraseña son "${values.DNI}", puede actualizar su contraseña en la seccion de perfil.`,
+      });
     } else {
-      console.log("Error al registrar paciente");
-      console.log(res.data);
+      toast({
+        variant: "destructive",
+        title: "Se produjo un error al crear el paciente",
+        description: "Intente nuevamente.",
+      });
     }
   }
 

@@ -21,7 +21,8 @@ const config = {
       colors: {
         "blue-primary": "#03ACF2",
         border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
+        //input: "hsl(var(--input))",
+        input: "#1A1A1A",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

@@ -44,6 +44,7 @@ func CrearPacientes(n int) {
 		paciente.Apellido_paterno = faker.LastName()
 		paciente.Apellido_materno = faker.LastName()
 		paciente.Direccion = ""
+		paciente.Email = faker.Email()
 		paciente.Telefono = faker.Phonenumber()[:9]
 		paciente.Ocupacion = "Ingeniero"
 		paciente.FechaNacimiento = faker.Date()

@@ -12,6 +12,7 @@ type Paciente struct {
 	Apellido_materno string `gorm:"not null;type:varchar(30)"`
 	Genero           string `gorm:"not null;type:enum('masculino','femenino')"`
 	Direccion        string `gorm:"type:varchar(100)"`
+	Email            string `gorm:"type:varchar(40)"`
 	Telefono         string `gorm:"not null;type:varchar(12)"`
 	Ocupacion        string `gorm:"type:varchar(30)"`
 	FechaNacimiento  string `gorm:"not null; type:date"`

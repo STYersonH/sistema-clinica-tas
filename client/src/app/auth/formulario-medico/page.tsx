@@ -3,10 +3,9 @@
 import React from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-
 import {
   Form,
   FormControl,
@@ -26,32 +25,32 @@ import {
 } from "@/components/ui/select";
 
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useRouter, useSearchParams } from "next/navigation";
-import { postPaciente } from "../apiRoutes/pacientes/pacientesApi";
+import { postMedico } from "../../apiRoutes/medicos/pacientesApi";
 
 const formSchema = z.object({
   nombres: z.string().min(2).max(50),
   apellidos: z.string().min(2).max(50),
   DNI: z.string().min(8).max(8),
   genero: z.string().optional(),
-  direccionVivienda: z.string().min(2).max(50),
+  numeroLiscencia: z.string().min(8).max(8),
   diaBirthDate: z.string().optional(),
   mesBirthDate: z.string().optional(),
   anioBirthDate: z.string().optional(),
   nroCelular: z.string().min(9).max(9),
   email: z.string().email(),
-  ocupacion: z.string().optional(),
+  especialidad: z.string().optional(),
+  direccionVivienda: z.string().min(2).max(50),
 });
 
-const FormCrearCuenta = () => {
+const FormMedico = () => {
   const router = useRouter();
+  const { toast } = useToast();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -61,21 +60,21 @@ const FormCrearCuenta = () => {
       apellidos: "",
       DNI: "",
       genero: "",
-      direccionVivienda: "",
+      numeroLiscencia: "",
       diaBirthDate: "",
       mesBirthDate: "",
       anioBirthDate: "",
       nroCelular: "",
       email: "",
-      ocupacion: "",
+      especialidad: "",
+      direccionVivienda: "",
     },
   });
 
+  //TODO: Obtener las especialidades para mostrar en el formulario
+
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-
     // obtener apellido paterno y materno
     const apellidos = values.apellidos.split(" ");
 
@@ -84,54 +83,56 @@ const FormCrearCuenta = () => {
 
     const data = {
       DNI: values.DNI,
+      numero_liscencia: values.numeroLiscencia,
       nombres: values.nombres,
       apellido_paterno: apellidos[0],
       apellido_materno: apellidos[1],
       genero: values.genero,
+      email: values.email,
       direccion: values.direccionVivienda,
       telefono: values.nroCelular,
-      ocupacion: values.ocupacion,
       fechaNacimiento: fechaNacimiento, // anio mes dia
+      especialidad_id: values.especialidad,
     };
 
-    const res = await postPaciente(data);
+    const res = await postMedico(data);
 
     console.log(res.status);
 
     if (res.status === 201) {
-      console.log("Paciente registrado correctamente");
-      console.log(res.data);
+      //console.log(res.data);
+      toast({
+        title: "Paciente creado correctamente",
+        description: `Su usuario y contraseña son "${values.numeroLiscencia}"`, //TODO en cuanto se pueda actualizar al medico, actualizar este mensaje
+      });
     } else {
-      console.log("Error al registrar paciente");
-      console.log(res.data);
+      toast({
+        variant: "destructive",
+        title: "Se produjo un error al crear el paciente",
+        description: "Intente nuevamente.",
+      });
     }
   }
 
-  const handleS = (e: any) => {
-    e.preventDefault();
-    console.log("enviando...  ");
-  };
-
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-yellow-500">
+    <div className="flex h-screen flex-col items-center justify-center bg-blue-primary">
       <div
         className="flex gap-6"
         onClick={() => {
           router.push("/");
         }}
       >
-        <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
+        <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-blue-primary">
           <FaAngleLeft className="transition-transform duration-200 group-hover:scale-125" />
         </div>
-        <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
-          Creacion de cuenta para paciente
+        <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-blue-primary">
+          Creacion de cuenta para medico
         </h2>
       </div>
 
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          //onSubmit={handleS}
           className="w-[1200px] space-y-8 rounded-3xl border-2 border-solid bg-white p-10"
         >
           {/* nombres y apellidos */}
@@ -182,79 +183,8 @@ const FormCrearCuenta = () => {
             <div className="flex flex-1 flex-col gap-3 pt-1">
               <FormLabel>Fecha de nacimiento</FormLabel>
               <div className="flex w-full gap-2">
-                {/* Month */}
-                <div className="w-[50%]">
-                  <FormField
-                    control={form.control}
-                    name="mesBirthDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        {/*<FormLabel>Dia</FormLabel>*/}
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="mes" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="01">Enero</SelectItem>
-                            <SelectItem value="02">Febrero</SelectItem>
-                            <SelectItem value="03">Marzo</SelectItem>
-                            <SelectItem value="04">Abril</SelectItem>
-                            <SelectItem value="05">Mayo</SelectItem>
-                            <SelectItem value="06">Junio</SelectItem>
-                            <SelectItem value="07">Julio</SelectItem>
-                            <SelectItem value="08">Agosto</SelectItem>
-                            <SelectItem value="09">Septiembre</SelectItem>
-                            <SelectItem value="10">Octubre</SelectItem>
-                            <SelectItem value="11">Noviembre</SelectItem>
-                            <SelectItem value="12">Diciembre</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Day */}
-                <div className="w-[25%]">
-                  <FormField
-                    control={form.control}
-                    name="diaBirthDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        {/*<FormLabel>Dia</FormLabel>*/}
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="dia" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Array.from({ length: 31 }, (_, i) => i + 1).map(
-                              (day) => (
-                                <SelectItem key={`${day}`} value={`${day}`}>
-                                  {day}
-                                </SelectItem>
-                              ),
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
                 {/* Year */}
-                <div className="w-[25%]">
+                <div className="flex-1">
                   <FormField
                     control={form.control}
                     name="anioBirthDate"
@@ -279,6 +209,79 @@ const FormCrearCuenta = () => {
                                 {year}
                               </SelectItem>
                             ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Month */}
+                <div className="flex-1">
+                  <FormField
+                    control={form.control}
+                    name="mesBirthDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        {/*<FormLabel>Dia</FormLabel>*/}
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="mes" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Enero">Enero</SelectItem>
+                            <SelectItem value="Febrero">Febrero</SelectItem>
+                            <SelectItem value="Marzo">Marzo</SelectItem>
+                            <SelectItem value="Abril">Abril</SelectItem>
+                            <SelectItem value="Mayo">Mayo</SelectItem>
+                            <SelectItem value="Junio">Junio</SelectItem>
+                            <SelectItem value="Julio">Julio</SelectItem>
+                            <SelectItem value="Agosto">Agosto</SelectItem>
+                            <SelectItem value="Septiembre">
+                              Septiembre
+                            </SelectItem>
+                            <SelectItem value="Octubre">Octubre</SelectItem>
+                            <SelectItem value="Noviembre">Noviembre</SelectItem>
+                            <SelectItem value="Diciembre">Diciembre</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Day */}
+                <div className="flex-1">
+                  <FormField
+                    control={form.control}
+                    name="diaBirthDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        {/*<FormLabel>Dia</FormLabel>*/}
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="dia" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Array.from({ length: 31 }, (_, i) => i + 1).map(
+                              (day) => (
+                                <SelectItem key={`${day}`} value={`${day}`}>
+                                  {day}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -383,7 +386,7 @@ const FormCrearCuenta = () => {
             </div>
           </div>
 
-          {/*Nro de Liscencia y Especialidad*/}
+          {/*Direccion de vivienda, Nro de Liscencia y Especialidad*/}
           <div className="flex gap-6">
             <div className="flex-1">
               <FormField
@@ -405,24 +408,58 @@ const FormCrearCuenta = () => {
               />
             </div>
 
-            <div className="flex-1">
-              <FormField
-                control={form.control}
-                name="ocupacion"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ocupacion</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Escribir su ocupacion"
-                        {...field}
-                        className=""
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="flex flex-1 gap-4">
+              <div className="flex-1">
+                <FormField
+                  control={form.control}
+                  name="numeroLiscencia"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Numero de liscencia</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="numero de liscencia"
+                          {...field}
+                          className=""
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="flex-1">
+                <FormField
+                  control={form.control}
+                  name="especialidad"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Especialidad</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar especialidad" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="General">General</SelectItem>
+                          <SelectItem value="Traumatologia">
+                            Traumatologia
+                          </SelectItem>
+                          <SelectItem value="Dermatologia">
+                            Dermatologia
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </div>
 
@@ -440,4 +477,4 @@ const FormCrearCuenta = () => {
   );
 };
 
-export default FormCrearCuenta;
+export default FormMedico;

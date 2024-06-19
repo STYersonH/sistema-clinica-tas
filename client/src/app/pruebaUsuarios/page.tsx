@@ -3,7 +3,7 @@
 import React from "react";
 import { getUsers } from "../apiRoutes/usuarios/usuariosApi";
 import { postPaciente } from "../apiRoutes/pacientes/pacientesApi";
-import { login } from "../apiRoutes/pacientes/pacientesApi";
+import { login } from "../apiRoutes/authLogin/authLoginApi";
 import { updatePaciente } from "../apiRoutes/pacientes/pacientesApi";
 
 const page = () => {

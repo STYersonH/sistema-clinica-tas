@@ -6,6 +6,7 @@ import (
 	"github.com/asterfy/tis-clinic/initializers"
 	"github.com/asterfy/tis-clinic/models"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func GetAllDoctors(c *gin.Context) {
@@ -40,7 +41,25 @@ func CreateDoctor(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": doctor})
+	//Crear cuenta para doctor
+	var usuarioDoctor models.Usuario
+	usuarioDoctor.LicenciaDoctor = &doctor.NumeroLicencia
+	usuarioDoctor.Tipo = "Doctor"
+	usuarioDoctor.Habilitado = true
+
+	bytes, err := bcrypt.GenerateFromPassword([]byte(doctor.NumeroLicencia), 7)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	usuarioDoctor.Password = string(bytes)
+	if result := initializers.DB.Create(&usuarioDoctor); result.Error != nil {
+		c.JSON(500, gin.H{"error": result.Error})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"mesage": "Doctor y cuenta de usuario creado", "data": doctor})
 }
 
 func UpdateDoctor(c *gin.Context) {

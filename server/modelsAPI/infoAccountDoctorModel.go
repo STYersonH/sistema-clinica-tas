@@ -1,6 +1,7 @@
 package modelsApi
 
 type InfoAccountDoctor struct {
+	IdDoctor          uint
 	Dni               string
 	NroLiscencia      string
 	Nombres           string

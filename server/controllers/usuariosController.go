@@ -42,6 +42,7 @@ func GetUser(c *gin.Context) {
 		}
 
 		var accountPacient modelsApi.InfoAccountPacient
+		accountPacient.IdPaciente = paciente.ID
 		accountPacient.Dni = paciente.Dni
 		accountPacient.Nombres = paciente.Nombres
 		accountPacient.Apellidos = paciente.Apellido_paterno + " " + paciente.Apellido_materno
@@ -60,6 +61,7 @@ func GetUser(c *gin.Context) {
 		}
 
 		var accountDoctor modelsApi.InfoAccountDoctor
+		accountDoctor.IdDoctor = doctor.ID
 		accountDoctor.Dni = doctor.Dni
 		accountDoctor.NroLiscencia = doctor.NumeroLicencia
 		accountDoctor.Nombres = doctor.Nombres

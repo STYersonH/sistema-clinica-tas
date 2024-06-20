@@ -30,7 +30,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { postPaciente } from "../../apiRoutes/pacientes/pacientesApi";
+import { updatePaciente } from "@/app/apiRoutes/pacientes/pacientesApi";
 
 const formSchema = z.object({
   nombres: z.string().min(1, { message: "Debe ingresar sus nombres" }).max(50),

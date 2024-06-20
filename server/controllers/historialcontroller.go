@@ -5,6 +5,7 @@ import (
 
 	"github.com/asterfy/tis-clinic/initializers"
 	"github.com/asterfy/tis-clinic/models"
+	modelsApi "github.com/asterfy/tis-clinic/modelsAPI"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,18 +30,19 @@ func GetHistorial(c *gin.Context) {
 }
 
 func CreateHistorial(c *gin.Context) {
-	var historial models.HistorialClinico
-	if err := c.ShouldBindJSON(&historial); err != nil {
+	var clinicHistorialGet modelsApi.ClinicHistorialGet
+
+	if err := c.ShouldBindJSON(&clinicHistorialGet); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if result := initializers.DB.Create(&historial); result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
-		return
-	}
+	// if result := initializers.DB.Create(&historial); result.Error != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
+	// 	return
+	// }
 
-	c.JSON(http.StatusCreated, gin.H{"data": historial})
+	c.JSON(http.StatusCreated, gin.H{"data": clinicHistorialGet})
 }
 
 func UpdateHistorial(c *gin.Context) {

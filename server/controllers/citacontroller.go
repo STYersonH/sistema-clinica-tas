@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"math/rand"
 	"net/http"
 
 	"github.com/asterfy/tis-clinic/initializers"
@@ -35,12 +36,30 @@ func CreateCita(c *gin.Context) {
 		return
 	}
 
+	var doctoresEspecialidad []models.Doctor
+	if result := initializers.DB.Where("especialidad_id = ?", cita.EspecialidadId).Find(&doctoresEspecialidad); result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
+		return
+	}
+	if len(doctoresEspecialidad) == 0 {
+		if result := initializers.DB.Find(&doctoresEspecialidad); result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
+			return
+		}
+	}
+
+	var numerosLicencia []string
+	for _, doctor := range doctoresEspecialidad {
+		numerosLicencia = append(numerosLicencia, doctor.NumeroLicencia)
+	}
+	cita.LicenciaDoctor = numerosLicencia[rand.Intn(len(numerosLicencia))]
+
 	if result := initializers.DB.Create(&cita); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": cita})
+	c.JSON(http.StatusCreated, gin.H{"data": cita, "message": "Cita creada!"})
 }
 
 func UpdateCita(c *gin.Context) {

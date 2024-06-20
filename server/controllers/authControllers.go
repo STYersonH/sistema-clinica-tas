@@ -3,12 +3,13 @@ package controllers
 import (
 	"github.com/asterfy/tis-clinic/initializers"
 	"github.com/asterfy/tis-clinic/models"
+	modelsApi "github.com/asterfy/tis-clinic/modelsAPI"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func ValidateLogin(c *gin.Context) {
-	var usuarioJson models.UserJson
+	var usuarioJson modelsApi.UserJson
 
 	if err := c.BindJSON(&usuarioJson); err != nil {
 		c.JSON(400, gin.H{"error": "Error parsing JSON"})

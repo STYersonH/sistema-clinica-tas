@@ -5,3 +5,5 @@ const documentApi = axios.create({
 });
 
 export const login = (data: any) => documentApi.post("auth/", data);
+export const getInformacionUsuario = (id: string) =>
+  documentApi.get(`usuarios/${id}/`);

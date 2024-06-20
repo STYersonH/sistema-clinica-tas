@@ -11,6 +11,13 @@ const PacientePage = () => {
   const { data: session, status } = useSession();
   console.log("En paciente page, paciente", session);
 
+  const datosPaciente = session?.user;
+
+  // obtener fecha de nacimiento
+  let fechaNacimiento = datosPaciente.FechaNacimiento;
+  fechaNacimiento = fechaNacimiento.slice(0, 10);
+
+
   const [citaExiste, setCitaExiste] = useState(true);
   const [seguroExiste, setSeguroExiste] = useState(true);
   const [citaTerminada, setCitaTerminada] = useState(true);
@@ -29,26 +36,31 @@ const PacientePage = () => {
           />
           <div className="flex flex-col items-center rounded-2xl border border-gris p-8">
             <p className="text-2xl font-bold text-yellow-600">
-              DNI: <span className="font-normal">77777777</span>
+              DNI: <span className="font-normal">{datosPaciente.Dni}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
-              Nombres: <span className="font-normal">Mat Rony</span>
+              Nombres:{" "}
+              <span className="font-normal">{datosPaciente.Nombres}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
-              Apellidos: <span className="font-normal">Omeda Salcedo</span>
+              Apellidos:{" "}
+              <span className="font-normal">{datosPaciente.Apellidos}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
-              Genero: <span className="font-normal">Masculino</span>
+              Genero:{" "}
+              <span className="font-normal">{datosPaciente.Genero}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
-              Telefono: <span className="font-normal">934223234</span>
+              Telefono:{" "}
+              <span className="font-normal">{datosPaciente.Telefono}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
-              Direccion: <span className="font-normal">Los alamos 11 - A</span>
+              Direccion:{" "}
+              <span className="font-normal">{datosPaciente.Direccion}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
               Fecha de nacimiento:{" "}
-              <span className="font-normal">20/01/1995</span>
+              <span className="font-normal">{fechaNacimiento}</span>
             </p>
           </div>
         </div>

@@ -1,6 +1,9 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { login } from "../../../apiRoutes/authLogin/authLoginApi";
+import {
+  login,
+  getInformacionUsuario,
+} from "../../../apiRoutes/authLogin/authLoginApi";
 import { getPaciente } from "../../../apiRoutes/pacientes/pacientesApi";
 import { getMedico } from "../../../apiRoutes/medicos/medicosApi";
 
@@ -30,30 +33,17 @@ const authOptions = {
         // Si hay exito redirigir a la pagina principal del usuario
         if (res.status === 200) {
           const usuario = res.data.data; // datos del usuario
-          console.log("Usuario", usuario);
+          console.log("Usuario", usuario.ID);
           console.log("Es un paciente?", usuario.Tipo);
 
-          /*
-          // Obtener los datos del usuario
-          if (usuario.Tipo === "paciente") {
-            console.log("DNI: ", usuario.DniPaciente);
-            const resp = await getPaciente(usuario.DniPaciente);
-            console.log(resp);
-          } else {
-            const res = await getMedico(usuario.LiscenciaMedico);
-          }
-          const datosPersonales = res.data.data;
-          console.log("Datos personales", datosPersonales);
+          const resGetInfo = await getInformacionUsuario(usuario.ID);
+          console.log("Informacion del paciente", resGetInfo.data.data);
 
-          const datosUsuario = {
-            tipo: usuario.tipo,
-            ...datosPersonales,
+          return {
+            ID: usuario.ID,
+            Tipo: usuario.Tipo,
+            ...resGetInfo.data.data,
           };
-
-          return datosUsuario;
-          */
-
-          return usuario;
         } else {
           console.log("Error al loguearse");
           throw new Error("Error al loguearse");

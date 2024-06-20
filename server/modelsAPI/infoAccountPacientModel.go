@@ -1,6 +1,7 @@
 package modelsApi
 
 type InfoAccountPacient struct {
+	IdPaciente        uint
 	Dni               string
 	Nombres           string
 	Apellidos         string

@@ -1,5 +1,6 @@
 import Image from "next/image";
-import ButtonCreateAccount from "./components/ButtonCreateAccount";
+import ButtonCreateAccount from "@/components/ButtonCreateAccount";
+import Button from "@/components/Button";
 
 export default function Home() {
   return (
@@ -7,9 +8,7 @@ export default function Home() {
       <div className="w-[1900px]">
         {/* Header */}
         <div className="flex justify-end">
-          <button className="mr-10 mt-10 rounded-full bg-green-400 px-16 py-3 text-xl font-bold text-white transition-colors duration-200 hover:bg-green-500">
-            LOGIN{" "}
-          </button>
+          <Button href={"/auth/login"}>LOGIN</Button>
         </div>
 
         {/* Main */}
@@ -34,7 +33,7 @@ export default function Home() {
                 width={50}
                 height={50}
               />
-              <h2 className="text-3xl">CLINICA TAS MAL</h2>
+              <h2 className="text-3xl">CLINICA TAS</h2>
             </div>
 
             {/*Botones de creacion*/}
@@ -43,13 +42,13 @@ export default function Home() {
                 img={"/doc icon.svg"}
                 imgSize={60}
                 tipo="MEDICO"
-                href={"/formulario-medico"}
+                href={"/auth/formulario-medico"}
               />
               <ButtonCreateAccount
                 img={"/paciente icon.svg"}
                 imgSize={60}
                 tipo="PACIENTE"
-                href={"/formulario-paciente"}
+                href={"/auth/formulario-paciente"}
               />
             </div>
           </div>

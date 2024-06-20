@@ -43,11 +43,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
-  especialidad: z.string(),
+  especialidad: z.string().min(1, { message: "elegir Especialidad" }),
+  motivoConsulta: z
+    .string()
+    .min(1, { message: "escribir motivo de la consulta" }),
   // fecha obligatoria
-  fechaCita: z.date(),
-  horaCita: z.string().min(8).max(21),
-  minutoCita: z.string().min(0).max(30),
+  fechaCita: z.date({ message: "elegir fecha" }),
+  horaCita: z.string().min(1, { message: "elegir hora" }),
+  minutoCita: z.string().min(1, { message: "elegir minutos" }),
 });
 
 const FormCrearCuenta = () => {
@@ -81,7 +84,7 @@ const FormCrearCuenta = () => {
       <div
         className="flex gap-6"
         onClick={() => {
-          router.push("/");
+          router.push("/dashboard/paciente/");
         }}
       >
         <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
@@ -148,7 +151,7 @@ const FormCrearCuenta = () => {
           <div>
             <FormField
               control={form.control}
-              name="especialidad"
+              name="motivoConsulta"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Motivo de la consulta</FormLabel>
@@ -166,21 +169,22 @@ const FormCrearCuenta = () => {
 
           {/* Fecha y Hora */}
           <div className="flex">
-            {/*fecha */}
-            <div className="flex-1">
+            {/* fecha de nacimiento */}
+            <div className="mt-1 flex-1">
               <FormField
                 control={form.control}
                 name="fechaCita"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem className="flex flex-col gap-1">
                     <FormLabel>Fecha de la cita</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant={"outline"}
+                            size={"lg"}
                             className={cn(
-                              "w-[240px] pl-3 text-left font-normal",
+                              "mt-2 w-[240px] pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground",
                             )}
                           >
@@ -209,7 +213,7 @@ const FormCrearCuenta = () => {
               />
             </div>
             <div className="flex-1">
-              {/* Fecha de cumpleanios */}
+              {/* hora de la cita */}
               <div className="flex flex-1 flex-col gap-3 pt-1">
                 <FormLabel>Hora de la cita</FormLabel>
                 <div className="flex w-full items-center gap-4">
@@ -249,7 +253,7 @@ const FormCrearCuenta = () => {
 
                   <p className="text-3xl">:</p>
 
-                  {/* Day */}
+                  {/* minuto de la cita */}
                   <div className="flex-1">
                     <FormField
                       control={form.control}

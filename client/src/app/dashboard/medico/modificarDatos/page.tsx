@@ -25,43 +25,49 @@ import {
 } from "@/components/ui/select";
 
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { postMedico } from "@/app/apiRoutes/medicos/medicosApi";
 
 const formSchema = z.object({
-  nombres: z.string().min(2).max(50),
-  apellidos: z.string().min(2).max(50),
-  DNI: z.string().min(8).max(8),
-  genero: z.string().optional(),
-  numeroLiscencia: z.string().min(8).max(8),
-  diaBirthDate: z.string().optional(),
-  mesBirthDate: z.string().optional(),
-  anioBirthDate: z.string().optional(),
-  nroCelular: z.string().min(9).max(9),
-  email: z.string().email(),
-  especialidad: z.string().optional(),
-  direccionVivienda: z.string().min(2).max(50),
+  nombres: z.string().min(1, { message: "Debe ingresar sus nombres" }).max(50),
+  apellidos: z
+    .string()
+    .min(1, { message: "Debe ingresar sus apellidos" })
+    .max(50),
+  DNI: z
+    .string()
+    .length(8, { message: "El dni debe tener exactamente 8 numeros" }),
+  genero: z.string().min(1, { message: "Debe elegir su genero" }),
+  numeroLiscencia: z.string().length(10, {
+    message: "El numero de liscencia debe tener exactamente 10 caracteres",
+  }),
+  diaBirthDate: z.string().min(1, { message: "elegir dia" }),
+  mesBirthDate: z.string().min(1, { message: "elegir mes" }),
+  anioBirthDate: z.string().min(1, { message: "elegir año" }),
+  nroCelular: z.string().length(9, {
+    message: "El numero de celular debe tener exactamente 8 numeros",
+  }),
+  email: z.string().email({ message: "Debe ingresar un correo valido" }),
+  especialidad: z.string().min(1, { message: "Debe elegir su especialidad" }),
+  direccionVivienda: z
+    .string()
+    .min(1, { message: "Debe ingresar sus direccion de vivienda" })
+    .max(50),
 });
 
 const FormMedico = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // usar params del URL
+  let id = searchParams.get("id");
+  console.log("id: ", id);
 
-  // Obtener el valor del parametro tipo
-  const tipo = searchParams.get("tipo");
-  console.log(tipo);
+  const router = useRouter();
+  const { toast } = useToast();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -82,11 +88,47 @@ const FormMedico = () => {
     },
   });
 
+  //TODO: Obtener las especialidades para mostrar en el formulario
+
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    // obtener apellido paterno y materno
+    const apellidos = values.apellidos.split(" ");
+
+    // obtener fecha de nacimiento
+    const fechaNacimiento = `${values.anioBirthDate}-${values.mesBirthDate}-${values.diaBirthDate}`;
+
+    const data = {
+      DNI: values.DNI,
+      numero_liscencia: values.numeroLiscencia,
+      nombres: values.nombres,
+      apellido_paterno: apellidos[0],
+      apellido_materno: apellidos[1],
+      genero: values.genero,
+      email: values.email,
+      direccion: values.direccionVivienda,
+      telefono: values.nroCelular,
+      fechaNacimiento: fechaNacimiento, // anio mes dia
+      especialidad_id: values.especialidad,
+    };
+
+    const res = await postMedico(data);
+
+    console.log(res.status);
+
+    if (res.status === 201) {
+      //console.log(res.data);
+      toast({
+        title: "Paciente creado correctamente",
+        description: `Su usuario y contraseña son "${values.numeroLiscencia}"`, //TODO en cuanto se pueda actualizar al medico, actualizar este mensaje
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Se produjo un error al crear el paciente",
+        description: "Intente nuevamente.",
+      });
+    }
   }
 
   return (
@@ -101,7 +143,7 @@ const FormMedico = () => {
           <FaAngleLeft className="transition-transform duration-200 group-hover:scale-125" />
         </div>
         <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-blue-primary">
-          Creacion de cuenta para medico
+          Modificacion de cuenta para medico
         </h2>
       </div>
 
@@ -158,8 +200,42 @@ const FormMedico = () => {
             <div className="flex flex-1 flex-col gap-3 pt-1">
               <FormLabel>Fecha de nacimiento</FormLabel>
               <div className="flex w-full gap-2">
+                {/* Year */}
+                <div className="flex-1">
+                  <FormField
+                    control={form.control}
+                    name="anioBirthDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        {/*<FormLabel>Dia</FormLabel>*/}
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="año" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Array.from(
+                              { length: 125 },
+                              (_, i) => 2024 - i,
+                            ).map((year) => (
+                              <SelectItem key={`${year}`} value={`${year}`}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 {/* Month */}
-                <div className="w-[50%]">
+                <div className="flex-1">
                   <FormField
                     control={form.control}
                     name="mesBirthDate"
@@ -199,7 +275,7 @@ const FormMedico = () => {
                 </div>
 
                 {/* Day */}
-                <div className="w-[25%]">
+                <div className="flex-1">
                   <FormField
                     control={form.control}
                     name="diaBirthDate"
@@ -223,40 +299,6 @@ const FormMedico = () => {
                                 </SelectItem>
                               ),
                             )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Year */}
-                <div className="w-[25%]">
-                  <FormField
-                    control={form.control}
-                    name="anioBirthDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        {/*<FormLabel>Dia</FormLabel>*/}
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="año" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Array.from(
-                              { length: 125 },
-                              (_, i) => 2024 - i,
-                            ).map((year) => (
-                              <SelectItem key={`${year}`} value={`${year}`}>
-                                {year}
-                              </SelectItem>
-                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -311,6 +353,7 @@ const FormMedico = () => {
                           placeholder="Escribir su DNI"
                           {...field}
                           className="w-full"
+                          disabled
                         />
                       </FormControl>
                       <FormMessage />
@@ -438,12 +481,19 @@ const FormMedico = () => {
             </div>
           </div>
 
-          <div className="w-full pt-5 text-center">
+          <div className="flex w-full justify-center gap-x-5 pt-5 text-center">
             <Button
               type="submit"
               className="rounded-3xl bg-green-500 px-16 py-7 font-bold hover:bg-green-600"
             >
-              Crear cuenta
+              Modificar cuenta
+            </Button>
+
+            <Button className="rounded-3xl bg-red-500 px-16 py-7 font-bold hover:bg-red-600">
+              Eliminar cuenta
+            </Button>
+            <Button className="rounded-3xl bg-stone-500 px-16 py-7 font-bold hover:bg-stone-600">
+              Cambiar contraseña
             </Button>
           </div>
         </form>

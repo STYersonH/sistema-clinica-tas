@@ -165,18 +165,24 @@ const FormCrearCuenta = () => {
       fechaNacimiento: fechaNacimiento, // anio mes dia
     };
 
-    console.log(datosPaciente.idPaciente, data);
-    const res = await updatePaciente(datosPaciente?.idPaciente, data);
+    try {
+      const res = await updatePaciente(datosPaciente?.IdPaciente, data);
 
-    console.log(res.status);
-
-    if (res.status === 201) {
-      //console.log(res.data);
-      toast({
-        title: "Paciente actualizado correctamente",
-        description: `Se actualizaron los datos del paciente`, //TODO en cuanto se pueda actualizar al paciente, colocar eso en este mensaje
-      });
-    } else {
+      if (res.status === 200) {
+        //console.log(res.data);
+        toast({
+          title: "Paciente actualizado correctamente",
+          description: `Se actualizaron los datos del paciente`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Se produjo un error al actualizar el paciente",
+          description: "Intente nuevamente.",
+        });
+      }
+    } catch (err: any) {
+      console.error(err);
       toast({
         variant: "destructive",
         title: "Se produjo un error al actualizar el paciente",

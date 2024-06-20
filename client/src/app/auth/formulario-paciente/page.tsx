@@ -97,24 +97,38 @@ const FormCrearCuenta = () => {
       telefono: values.nroCelular,
       ocupacion: values.ocupacion,
       fechaNacimiento: fechaNacimiento, // anio mes dia
+      email: values.email,
     };
 
-    const res = await postPaciente(data);
+    try {
+      const res = await postPaciente(data);
+      console.log(data);
 
-    console.log(res.status);
+      console.log(res);
 
-    if (res.status === 201) {
-      //console.log(res.data);
-      toast({
-        title: "Paciente creado correctamente",
-        description: `Su usuario y contraseña son "${values.DNI}".`, //TODO en cuanto se pueda actualizar al paciente, colocar eso en este mensaje
-      });
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Se produjo un error al crear el paciente",
-        description: "Intente nuevamente.",
-      });
+      if (res.status === 201) {
+        //console.log(res.data);
+        toast({
+          title: "Paciente creado correctamente",
+          description: `Su usuario y contraseña son "${values.DNI}".`, //TODO en cuanto se pueda actualizar al paciente, colocar eso en este mensaje
+        });
+        router.push("/dashboard/paciente");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Se produjo un error al crear el paciente",
+          description: "Intente nuevamente.",
+        });
+      }
+    } catch (error: any) {
+      console.log(error.response.data.error);
+      if (error.response.data.error.Number === 1062) {
+        toast({
+          variant: "destructive",
+          title: "El DNI ya esta registrado",
+          description: "Intente con otro DNI.",
+        });
+      }
     }
   }
 

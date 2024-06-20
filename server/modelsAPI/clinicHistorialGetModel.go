@@ -1,9 +1,10 @@
 package modelsApi
 
 type ClinicHistorialGet struct {
-	IdCita         int
-	DniPaciente    string
-	LicenciaDoctor string
-	Diagnostico    string
-	Tratamienots   []Treatment
+	IdCita           int
+	Diagnostico      string
+	DniPaciente      string
+	LicenciaMedico   string
+	FechaDiagnostico string
+	Tratamientos     []Treatment
 }

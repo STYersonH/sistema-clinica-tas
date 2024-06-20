@@ -10,7 +10,7 @@ import (
 
 func GetAllTratamientos(c *gin.Context) {
 	var tratamientos []models.Tratamiento
-	if result := initializers.DB.Find(&tratamientos); result.Error != nil {
+	if result := initializers.DB.Preload("HistorialClinico").Find(&tratamientos); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}

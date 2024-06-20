@@ -13,6 +13,8 @@ func SetupRoutes(router *gin.Engine) {
 	{
 		asegurados.GET("/", controllers.GetAllAsegurados)
 		asegurados.GET("/:id/", controllers.GetAsegurado)
+		asegurados.GET("/dni/:dni_asegurado/", controllers.GetAseguradoporDNI)
+		asegurados.GET("/seguro/:dni_asegurado/", controllers.GetSeguroporDNI)
 		asegurados.POST("/", controllers.CreateAsegurado)
 		asegurados.PUT("/:id/", controllers.UpdateAsegurado)
 		asegurados.DELETE("/:id/", controllers.DeleteAsegurado)
@@ -21,6 +23,8 @@ func SetupRoutes(router *gin.Engine) {
 	{
 		citas.GET("/", controllers.GetAllCitas)
 		citas.GET("/:id/", controllers.GetCita)
+		citas.GET("/pendientedoctor/:licencia_doctor", controllers.GetCitasPendientesporLicenciaDoctor)
+		citas.GET("/pendientepaciente/:dni_paciente", controllers.GetCitasPendientesporDniPaciente)
 		citas.POST("/", controllers.CreateCita)
 		citas.PUT("/:id/", controllers.UpdateCita)
 		citas.DELETE("/:id/", controllers.DeleteCita)

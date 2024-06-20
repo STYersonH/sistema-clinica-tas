@@ -10,7 +10,7 @@ import (
 
 func GetAllAsegurados(c *gin.Context) {
 	var asegurados []models.Asegurado
-	if result := initializers.DB.Find(&asegurados); result.Error != nil {
+	if result := initializers.DB.Preload("Paciente").Preload("Seguro").Find(&asegurados); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}
@@ -20,7 +20,7 @@ func GetAllAsegurados(c *gin.Context) {
 
 func GetAsegurado(c *gin.Context) {
 	var asegurado models.Asegurado
-	if result := initializers.DB.First(&asegurado, c.Param("id")); result.Error != nil {
+	if result := initializers.DB.Preload("Paciente").Preload("Seguro").First(&asegurado, c.Param("id")); result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -28,6 +28,32 @@ func GetAsegurado(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": asegurado})
 }
 
+// datos de asegurado dado el DNI del paciente
+func GetAseguradoporDNI(c *gin.Context) {
+	var asegurado models.Asegurado
+	dni := c.Param("dni_asegurado")
+	if err := initializers.DB.Preload("Paciente").Preload("Seguro").Where("dni_asegurado=?", dni).First(&asegurado).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found"})
+		return
+	}
+	c.JSON(http.StatusOK, asegurado)
+}
+
+// Datos del seguro dado el Dni del paciente
+func GetSeguroporDNI(c *gin.Context) {
+	var asegurado models.Asegurado
+	dni := c.Param("dni_asegurado")
+	if err := initializers.DB.Preload("Seguro").Where("dni_asegurado=?", dni).First(&asegurado).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"seguro_id":   asegurado.SeguroId,
+		"tipo_seguro": asegurado.Seguro.TipoSeguro,
+		"precio":      asegurado.Seguro.Precio,
+	})
+
+}
 func CreateAsegurado(c *gin.Context) {
 	var asegurado models.Asegurado
 	if err := c.ShouldBindJSON(&asegurado); err != nil {

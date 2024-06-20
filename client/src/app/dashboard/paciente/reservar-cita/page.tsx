@@ -81,7 +81,7 @@ const FormCrearCuenta = () => {
       <div
         className="flex gap-6"
         onClick={() => {
-          router.push("/");
+          router.push("/dashboard/paciente/");
         }}
       >
         <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
@@ -166,21 +166,22 @@ const FormCrearCuenta = () => {
 
           {/* Fecha y Hora */}
           <div className="flex">
-            {/*fecha */}
-            <div className="flex-1">
+            {/* fecha de nacimiento */}
+            <div className="mt-1 flex-1">
               <FormField
                 control={form.control}
                 name="fechaCita"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem className="flex flex-col gap-1">
                     <FormLabel>Fecha de la cita</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant={"outline"}
+                            size={"lg"}
                             className={cn(
-                              "w-[240px] pl-3 text-left font-normal",
+                              "mt-2 w-[240px] pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground",
                             )}
                           >
@@ -209,7 +210,7 @@ const FormCrearCuenta = () => {
               />
             </div>
             <div className="flex-1">
-              {/* Fecha de cumpleanios */}
+              {/* hora de la cita */}
               <div className="flex flex-1 flex-col gap-3 pt-1">
                 <FormLabel>Hora de la cita</FormLabel>
                 <div className="flex w-full items-center gap-4">
@@ -249,7 +250,7 @@ const FormCrearCuenta = () => {
 
                   <p className="text-3xl">:</p>
 
-                  {/* Day */}
+                  {/* minuto de la cita */}
                   <div className="flex-1">
                     <FormField
                       control={form.control}

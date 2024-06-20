@@ -82,7 +82,7 @@ const AsegurarPage = () => {
       <div
         className="flex gap-6"
         onClick={() => {
-          router.push("/");
+          router.push("/dashboard/paciente/");
         }}
       >
         <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">

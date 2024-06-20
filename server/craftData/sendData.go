@@ -114,8 +114,6 @@ func CrearUsuario(tipoUsuario string, codigoUsaurio string) {
 	//Guardar usuario
 	if result := initializers.DB.Create(&usuario); result.Error != nil {
 		fmt.Println("Error al guardar paciente")
-	} else {
-		fmt.Println("Paciente guardado")
 	}
 }
 

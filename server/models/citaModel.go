@@ -15,5 +15,5 @@ type Cita struct {
 	EspecialidadId uint         `gorm:"not null"` // foreign key
 	Especialidad   Especialidad `gorm:"not null; foreignkey:EspecialidadId"`
 	Motivo         string       `gorm:"not null; type:varchar(50)"`
-	Estado         string       `gorm:"not null; type:enum('programada','completada','cancelada')"`
+	Estado         string       `gorm:"not null; type:enum('pendiente','completada','cancelada')"`
 }

@@ -10,7 +10,7 @@ import (
 
 func GetAllCitas(c *gin.Context) {
 	var citas []models.Cita
-	if result := initializers.DB.Preload("Paciente").Preload("Doctro.Especialidad").Preload("Especialidad").Find(&citas); result.Error != nil {
+	if result := initializers.DB.Preload("Paciente").Preload("Doctor.Especialidad").Preload("Especialidad").Find(&citas); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}
@@ -20,7 +20,7 @@ func GetAllCitas(c *gin.Context) {
 
 func GetCita(c *gin.Context) {
 	var cita models.Cita
-	if result := initializers.DB.Preload("Paciente").Preload("Doctro.Especialidad").Preload("Especialidad").First(&cita, c.Param("id")); result.Error != nil {
+	if result := initializers.DB.Preload("Paciente").Preload("Doctor.Especialidad").Preload("Especialidad").First(&cita, c.Param("id")); result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -32,7 +32,7 @@ func GetCita(c *gin.Context) {
 func GetCitasPendientesporLicenciaDoctor(c *gin.Context) {
 	licenciaDoctor := c.Param("licencia_doctor")
 	var citas []models.Cita
-	if result := initializers.DB.Preload("Paciente").Preload("Doctor.Especialidad").Preload("Especialidad").Where("licencia_doctor = ? AND estado = ?", licenciaDoctor, "programada").Find(&citas); result.Error != nil {
+	if result := initializers.DB.Preload("Paciente").Preload("Doctor.Especialidad").Preload("Especialidad").Where("licencia_doctor = ? AND estado = ?", licenciaDoctor, "pendiente").Find(&citas); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}
@@ -44,7 +44,7 @@ func GetCitasPendientesporLicenciaDoctor(c *gin.Context) {
 func GetCitasPendientesporDniPaciente(c *gin.Context) {
 	dniPaciente := c.Param("dni_paciente")
 	var citas []models.Cita
-	if result := initializers.DB.Where("dni_paciente = ? AND estado = ?", dniPaciente, "programada").Find(&citas); result.Error != nil {
+	if result := initializers.DB.Where("dni_paciente = ? AND estado = ?", dniPaciente, "pendiente").Find(&citas); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}

@@ -1,6 +1,9 @@
 "use client";
 
-import React from "react";
+import { getInformacionUsuario } from "@/app/apiRoutes/authLogin/authLoginApi";
+import { signOut, useSession } from "next-auth/react";
+
+import React, { useEffect, useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,7 +63,66 @@ const formSchema = z.object({
   ocupacion: z.string().optional(), // no obligatorio
 });
 
+interface DatosPaciente {
+  Nombres: string;
+  Apellidos: string;
+  Dni: string;
+  Genero: string;
+  Direccion: string;
+  FechaNacimiento: string;
+  Telefono: string;
+  CorreoElectronico: string;
+  Ocupacion: string;
+}
+
+// Assuming the original type of `user` is something like this:
+
+// Extend the User type to include the ID property
+type ExtendedUser = {
+  ID?: string | null;
+};
+
 const FormCrearCuenta = () => {
+  // obtener los datos de la session
+  const { data: session, status } = useSession();
+
+  const usuarioID = (session?.user as ExtendedUser)?.ID;
+  const [datosPaciente, setDatosPaciente] = useState<DatosPaciente | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const fetchDatosPaciente = async () => {
+      if (usuarioID) {
+        // obtener los datos del paciente
+        const res = await getInformacionUsuario(usuarioID);
+        console.log(res.data.data);
+        setDatosPaciente(res.data.data);
+      }
+    };
+
+    fetchDatosPaciente();
+  }, [usuarioID]);
+
+  // Nuevo useEffect para actualizar el formulario
+  useEffect(() => {
+    if (datosPaciente) {
+      form.reset({
+        nombres: datosPaciente?.Nombres || "",
+        apellidos: datosPaciente?.Apellidos || "",
+        DNI: datosPaciente?.Dni || "",
+        genero: datosPaciente?.Genero || "",
+        anioBirthDate: datosPaciente?.FechaNacimiento.slice(0, 4) || "",
+        mesBirthDate: datosPaciente?.FechaNacimiento.slice(5, 7) || "",
+        diaBirthDate: datosPaciente?.FechaNacimiento.slice(8, 10) || "",
+        nroCelular: datosPaciente?.Telefono || "",
+        email: datosPaciente?.CorreoElectronico || "",
+        direccionVivienda: datosPaciente?.Direccion || "",
+        ocupacion: datosPaciente?.Ocupacion || "",
+      });
+    }
+  }, [datosPaciente]);
+
   const router = useRouter();
   const { toast } = useToast();
 
@@ -68,9 +130,9 @@ const FormCrearCuenta = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nombres: "Matias",
+      nombres: "",
       apellidos: "",
-      DNI: "75644312",
+      DNI: "",
       genero: "",
       direccionVivienda: "",
       diaBirthDate: "",
@@ -86,39 +148,7 @@ const FormCrearCuenta = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // obtener apellido paterno y materno
     const apellidos = values.apellidos.split(" ");
-
-    // obtener fecha de nacimiento
-    const fechaNacimiento = `${values.anioBirthDate}-${values.mesBirthDate}-${values.diaBirthDate}`;
-
-    const data = {
-      DNI: values.DNI,
-      nombres: values.nombres,
-      apellido_paterno: apellidos[0],
-      apellido_materno: apellidos[1],
-      genero: values.genero,
-      direccion: values.direccionVivienda,
-      telefono: values.nroCelular,
-      ocupacion: values.ocupacion,
-      fechaNacimiento: fechaNacimiento, // anio mes dia
-    };
-
-    const res = await postPaciente(data);
-
-    console.log(res.status);
-
-    if (res.status === 201) {
-      //console.log(res.data);
-      toast({
-        title: "Paciente creado correctamente",
-        description: `Su usuario y contraseña son "${values.DNI}".`, //TODO en cuanto se pueda actualizar al paciente, colocar eso en este mensaje
-      });
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Se produjo un error al crear el paciente",
-        description: "Intente nuevamente.",
-      });
-    }
+    console.log(values);
   }
 
   return (
@@ -126,7 +156,7 @@ const FormCrearCuenta = () => {
       <div
         className="flex gap-6"
         onClick={() => {
-          router.push("/");
+          router.push("/dashboard/paciente");
         }}
       >
         <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
@@ -205,7 +235,12 @@ const FormCrearCuenta = () => {
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="año" />
+                              <SelectValue
+                                placeholder={datosPaciente?.FechaNacimiento.slice(
+                                  0,
+                                  4,
+                                )}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -239,7 +274,12 @@ const FormCrearCuenta = () => {
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="mes" />
+                              <SelectValue
+                                placeholder={datosPaciente?.FechaNacimiento.slice(
+                                  5,
+                                  7,
+                                )}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -277,7 +317,12 @@ const FormCrearCuenta = () => {
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="dia" />
+                              <SelectValue
+                                placeholder={datosPaciente?.FechaNacimiento.slice(
+                                  8,
+                                  10,
+                                )}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -312,7 +357,7 @@ const FormCrearCuenta = () => {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar su genero" />
+                          <SelectValue placeholder={datosPaciente?.Genero} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

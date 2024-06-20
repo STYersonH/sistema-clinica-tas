@@ -1,8 +1,8 @@
 package modelsApi
 
 type ClinicHistorialSend struct {
-	IdCita       int
-	Diagnostico  string
-	Medico       Medico
-	Tratamienots []Treatment
+	Diagnostico      string
+	FechaDiagnostico string
+	Medico           Medico
+	Tratamientos     []Treatment
 }

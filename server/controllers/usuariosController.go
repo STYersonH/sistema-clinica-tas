@@ -51,6 +51,7 @@ func GetUser(c *gin.Context) {
 		accountPacient.CorreoElectronico = paciente.Email
 		accountPacient.Telefono = paciente.Telefono
 		accountPacient.FechaNacimiento = paciente.FechaNacimiento
+		accountPacient.Ocupacion = paciente.Ocupacion
 
 		c.JSON(200, gin.H{"data": accountPacient})
 	} else {

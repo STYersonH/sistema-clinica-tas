@@ -50,6 +50,7 @@ const formSchema = z.object({
     .min(1, "Por favor seleccione un tipo de tratamiento"),
   descripcion: z.string().min(1, "Por favor escriba una descripcion"),
   medicamento: z.string().min(1, "Por favor seleccione un medicamento"),
+  dosis: z.string().min(1, "Por favor escriba la dosis"),
   frecuencia: z.string().min(1, "Por favor escriba la frecuencia"),
   duracion: z.string().min(1, "Por favor escriba la duracion"),
 });
@@ -57,6 +58,7 @@ const formSchema = z.object({
 interface Tratamiento {
   tipo: string;
   nombre?: string;
+  dosis?: string;
   frecuencia?: string;
   duracion?: string;
   descripcion?: string;
@@ -69,6 +71,7 @@ const TraramientoPage = () => {
     {
       tipo: "medicamento",
       nombre: "Paracetamol",
+      dosis: "800ml",
       frecuencia: "Cada 8 horas",
       duracion: "3 días",
     },
@@ -97,6 +100,7 @@ const TraramientoPage = () => {
       diagnostico: "",
       tipoTratamiento: "",
       descripcion: "",
+      dosis: "",
       medicamento: "",
       frecuencia: "",
       duracion: "",
@@ -110,7 +114,7 @@ const TraramientoPage = () => {
     console.log(values);
   }
 
-  const handleAgregarTratamiento = (e) => {
+  const handleAgregarTratamiento = (e: any) => {
     e.preventDefault();
 
     if (tipoTratamiento === "medicamento") {
@@ -150,11 +154,11 @@ const TraramientoPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-blue-primary py-10">
+    <div className="flex flex-col items-center justify-center bg-blue-primary py-10 pt-24">
       <div
         className="flex gap-6"
         onClick={() => {
-          router.push("/");
+          router.push("/dashboard/medico");
         }}
       >
         <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-blue-primary">
@@ -214,12 +218,18 @@ const TraramientoPage = () => {
                       </div>
                       <div className="flex flex-col items-center">
                         <p className="text-2xl font-bold">
-                          medicamento:{" "}
+                          Medicamento:{"  "}
                           <span className="font-normal">
                             {tratamiento.nombre}
                           </span>
                         </p>
                         <div className="flex justify-around gap-10">
+                          <p className="font-bold">
+                            dosis:{" "}
+                            <span className="font-normal">
+                              {tratamiento.dosis}
+                            </span>
+                          </p>
                           <p className="font-bold">
                             frecuencia:{" "}
                             <span className="font-normal">
@@ -298,78 +308,102 @@ const TraramientoPage = () => {
                   {tipoTratamiento !== "" &&
                     tipoTratamiento == "medicamento" && (
                       <div className="flex flex-1 flex-col gap-3 pt-1">
-                        <div className="flex w-full gap-4">
-                          {/* Month */}
-                          <div className="flex-1">
-                            <FormField
-                              control={form.control}
-                              name="medicamento"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Medicamento</FormLabel>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                  >
+                        <div className="flex w-full flex-col gap-4">
+                          {/* detalles de tratamietno */}
+                          <div className="flex w-full gap-4">
+                            <div className="flex-1">
+                              <FormField
+                                control={form.control}
+                                name="medicamento"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Medicamento</FormLabel>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="w-full">
+                                          <SelectValue placeholder="elegir" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="1">
+                                          Medicamento 1
+                                        </SelectItem>
+                                        <SelectItem value="2">
+                                          Medicamento 2
+                                        </SelectItem>
+                                        <SelectItem value="3">
+                                          Medicamento 3
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <FormField
+                                control={form.control}
+                                name="dosis"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Dosis</FormLabel>
                                     <FormControl>
-                                      <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="medicamento" />
-                                      </SelectTrigger>
+                                      <Input
+                                        type="text"
+                                        placeholder="800ml"
+                                        {...field}
+                                      />
                                     </FormControl>
-                                    <SelectContent>
-                                      <SelectItem value="1">
-                                        Medicamento 1
-                                      </SelectItem>
-                                      <SelectItem value="2">
-                                        Medicamento 2
-                                      </SelectItem>
-                                      <SelectItem value="3">
-                                        Medicamento 3
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <FormField
-                              control={form.control}
-                              name="frecuencia"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Frecuencia</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="text"
-                                      placeholder="Cada 8 horas"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <FormField
-                              control={form.control}
-                              name="duracion"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Duracion</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="text"
-                                      placeholder="3 días"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+
+                          <div className="flex w-full gap-4">
+                            <div className="flex-1">
+                              <FormField
+                                control={form.control}
+                                name="frecuencia"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Frecuencia</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="text"
+                                        placeholder="Cada 8 horas"
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <FormField
+                                control={form.control}
+                                name="duracion"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Duracion</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="text"
+                                        placeholder="3 días"
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
                           </div>
                         </div>
                         {/* avanzamos hasta aqui */}

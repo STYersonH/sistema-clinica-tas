@@ -1,6 +1,6 @@
 import Image from "next/image";
-import ButtonCreateAccount from "./components/ButtonCreateAccount";
-import ButtonLogin from "./components/ButtonLogin";
+import ButtonCreateAccount from "@/components/ButtonCreateAccount";
+import Button from "@/components/Button";
 
 export default function Home() {
   return (
@@ -8,7 +8,7 @@ export default function Home() {
       <div className="w-[1900px]">
         {/* Header */}
         <div className="flex justify-end">
-          <ButtonLogin href={"/auth/login"} />
+          <Button href={"/auth/login"}>LOGIN</Button>
         </div>
 
         {/* Main */}
@@ -33,7 +33,7 @@ export default function Home() {
                 width={50}
                 height={50}
               />
-              <h2 className="text-3xl">CLINICA TAS MAL</h2>
+              <h2 className="text-3xl">CLINICA TAS</h2>
             </div>
 
             {/*Botones de creacion*/}

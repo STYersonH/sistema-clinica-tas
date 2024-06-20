@@ -43,7 +43,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
-  diagnostico: z.string(),
+  diagnostico: z.string().min(1, "Por favor escriba un diagnostico"),
   // fecha obligatoria
   tipoTratamiento: z
     .string()

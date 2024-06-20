@@ -30,25 +30,42 @@ import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { postMedico } from "../../apiRoutes/medicos/pacientesApi";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { postMedico } from "../../apiRoutes/medicos/medicosApi";
 
 const formSchema = z.object({
-  nombres: z.string().min(2).max(50),
-  apellidos: z.string().min(2).max(50),
-  DNI: z.string().min(8).max(8),
-  genero: z.string().optional(),
-  numeroLiscencia: z.string().min(8).max(8),
-  diaBirthDate: z.string().optional(),
-  mesBirthDate: z.string().optional(),
-  anioBirthDate: z.string().optional(),
-  nroCelular: z.string().min(9).max(9),
-  email: z.string().email(),
-  especialidad: z.string().optional(),
-  direccionVivienda: z.string().min(2).max(50),
+  nombres: z.string().min(1, { message: "Debe ingresar sus nombres" }).max(50),
+  apellidos: z
+    .string()
+    .min(1, { message: "Debe ingresar sus apellidos" })
+    .max(50),
+  DNI: z
+    .string()
+    .length(8, { message: "El dni debe tener exactamente 8 numeros" }),
+  genero: z.string().min(1, { message: "Debe elegir su genero" }),
+  numeroLiscencia: z.string().length(10, {
+    message: "El numero de liscencia debe tener exactamente 10 caracteres",
+  }),
+  diaBirthDate: z.string().min(1, { message: "elegir dia" }),
+  mesBirthDate: z.string().min(1, { message: "elegir mes" }),
+  anioBirthDate: z.string().min(1, { message: "elegir año" }),
+  nroCelular: z.string().length(9, {
+    message: "El numero de celular debe tener exactamente 8 numeros",
+  }),
+  email: z.string().email({ message: "Debe ingresar un correo valido" }),
+  especialidad: z.string().min(1, { message: "Debe elegir su especialidad" }),
+  direccionVivienda: z
+    .string()
+    .min(1, { message: "Debe ingresar sus direccion de vivienda" })
+    .max(50),
 });
 
 const FormMedico = () => {
+  const searchParams = useSearchParams(); // usar params del URL
+  let id = searchParams.get("id");
+  console.log("id: ", id);
+
   const router = useRouter();
   const { toast } = useToast();
 

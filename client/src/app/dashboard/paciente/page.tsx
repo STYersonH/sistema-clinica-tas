@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Button from "@/components/Button";
 import { cn } from "@/lib/utils";
 
 const PacientePage = () => {
+  const { data: session, status } = useSession();
+  console.log("En paciente page, paciente", session);
+
   const [citaExiste, setCitaExiste] = useState(true);
   const [seguroExiste, setSeguroExiste] = useState(true);
   const [citaTerminada, setCitaTerminada] = useState(true);
@@ -17,14 +20,14 @@ const PacientePage = () => {
     <main className="flex h-screen justify-center">
       <div className="flex h-screen w-[1150px] items-center justify-between gap-x-20">
         {/*Informacion del usuario*/}
-        <div className="border-gris flex w-[550px] flex-col items-center gap-y-10 rounded-2xl border p-10">
+        <div className="flex w-[550px] flex-col items-center gap-y-10 rounded-2xl border border-gris p-10">
           <Image
             src="/paciente-icon.svg"
             alt="inicial img"
             width={300}
             height={300}
           />
-          <div className="border-gris flex flex-col items-center rounded-2xl border p-8">
+          <div className="flex flex-col items-center rounded-2xl border border-gris p-8">
             <p className="text-2xl font-bold text-yellow-600">
               DNI: <span className="font-normal">77777777</span>
             </p>
@@ -58,7 +61,7 @@ const PacientePage = () => {
           )}
         >
           {seguroExiste && (
-            <div className="text-yellow-primary border-gris mb-10 flex w-[500px] flex-col items-center justify-center rounded-2xl border p-10">
+            <div className="mb-10 flex w-[500px] flex-col items-center justify-center rounded-2xl border border-gris p-10 text-yellow-primary">
               <h2 className="text-2xl font-bold">USTED ESTA ASEGURADO</h2>
               <div className="mt-3 flex gap-x-5">
                 <p className="font-bold">Seguro estandar</p>
@@ -70,7 +73,7 @@ const PacientePage = () => {
           {!citaExiste && !citaTerminada && (
             <Button
               href="/dashboard/paciente/reservar-cita"
-              className="text-yellow-primary w-[500px] rounded-xl bg-stone-300 text-2xl hover:bg-stone-400 hover:text-white"
+              className="w-[500px] rounded-xl bg-stone-300 text-2xl text-yellow-primary hover:bg-stone-400 hover:text-white"
             >
               RESERVAR CITA
             </Button>
@@ -88,7 +91,7 @@ const PacientePage = () => {
           {citaTerminada && (
             <Button
               href="/dashboard/paciente/ver-tratamiento-medico"
-              className="text-yellow-primary w-[500px] rounded-xl bg-stone-300 text-2xl hover:bg-stone-400 hover:text-white"
+              className="w-[500px] rounded-xl bg-stone-300 text-2xl text-yellow-primary hover:bg-stone-400 hover:text-white"
             >
               VER TRATAMIENTO MEDICO
             </Button>
@@ -97,7 +100,7 @@ const PacientePage = () => {
           {!seguroExiste && (
             <Button
               href="/dashboard/paciente/asegurar"
-              className="text-yellow-primary w-[500px] rounded-xl bg-stone-300 text-2xl hover:bg-stone-400 hover:text-white"
+              className="w-[500px] rounded-xl bg-stone-300 text-2xl text-yellow-primary hover:bg-stone-400 hover:text-white"
             >
               SOLICITAR SEGURO MEDICO
             </Button>

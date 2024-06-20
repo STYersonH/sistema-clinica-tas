@@ -43,11 +43,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
-  especialidad: z.string(),
+  especialidad: z.string().min(1, { message: "elegir Especialidad" }),
+  motivoConsulta: z
+    .string()
+    .min(1, { message: "escribir motivo de la consulta" }),
   // fecha obligatoria
-  fechaCita: z.date(),
-  horaCita: z.string().min(8).max(21),
-  minutoCita: z.string().min(0).max(30),
+  fechaCita: z.date({ message: "elegir fecha" }),
+  horaCita: z.string().min(1, { message: "elegir hora" }),
+  minutoCita: z.string().min(1, { message: "elegir minutos" }),
 });
 
 const FormCrearCuenta = () => {
@@ -148,7 +151,7 @@ const FormCrearCuenta = () => {
           <div>
             <FormField
               control={form.control}
-              name="especialidad"
+              name="motivoConsulta"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Motivo de la consulta</FormLabel>

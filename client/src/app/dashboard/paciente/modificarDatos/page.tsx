@@ -30,7 +30,10 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { postPaciente } from "../../apiRoutes/pacientes/pacientesApi";
+import {
+  updatePaciente,
+  postPaciente,
+} from "@/app/apiRoutes/pacientes/pacientesApi";
 
 const formSchema = z.object({
   nombres: z.string().min(1, { message: "Debe ingresar sus nombres" }).max(50),
@@ -65,9 +68,9 @@ const FormCrearCuenta = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nombres: "",
+      nombres: "Matias",
       apellidos: "",
-      DNI: "",
+      DNI: "75644312",
       genero: "",
       direccionVivienda: "",
       diaBirthDate: "",
@@ -130,7 +133,7 @@ const FormCrearCuenta = () => {
           <FaAngleLeft className="transition-transform duration-200 group-hover:scale-125" />
         </div>
         <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
-          Creacion de cuenta para paciente
+          Modificacion de cuenta para paciente
         </h2>
       </div>
 
@@ -339,6 +342,7 @@ const FormCrearCuenta = () => {
                           placeholder="Escribir su DNI"
                           {...field}
                           className="w-full"
+                          disabled
                         />
                       </FormControl>
                       <FormMessage />
@@ -432,12 +436,19 @@ const FormCrearCuenta = () => {
             </div>
           </div>
 
-          <div className="w-full pt-5 text-center">
+          <div className="flex w-full justify-center gap-x-5 pt-5 text-center">
             <Button
               type="submit"
               className="rounded-3xl bg-green-500 px-16 py-7 font-bold hover:bg-green-600"
             >
-              Crear cuenta
+              Modificar cuenta
+            </Button>
+
+            <Button className="rounded-3xl bg-red-500 px-16 py-7 font-bold hover:bg-red-600">
+              Eliminar cuenta
+            </Button>
+            <Button className="rounded-3xl bg-stone-500 px-16 py-7 font-bold hover:bg-stone-600">
+              Cambiar contraseña
             </Button>
           </div>
         </form>

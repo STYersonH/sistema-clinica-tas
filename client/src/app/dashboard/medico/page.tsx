@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Button from "@/components/Button";
@@ -10,17 +10,27 @@ import { tree } from "next/dist/build/templates/app-page";
 import { getCitasProgramadasDoctor } from "@/app/apiRoutes/citasPendientes/citasPendientes.api";
 
 const MedicoPage = () => {
-  const [citasPendientes, setCitasPendientes] = useState([])
+  const [citasPendientes, setCitasPendientes] = useState([]);
   const [citasExisten, setCitasExisten] = useState(true);
+  const [licMedico, setLicMedico] = useState("");
 
-  const fetchCitasPendientes = async () => {
-    const response = await getCitasProgramadasDoctor("5520859570");
-    setCitasPendientes(response.data.data);
-  }
+  const { data: session, status } = useSession();
+  const datosMedico = session?.user;
 
   useEffect(() => {
+    const licenciaMedico = datosMedico?.NroLiscencia;
+    setLicMedico(licenciaMedico);
+  }, [datosMedico]);
+
+  useEffect(() => {
+    const fetchCitasPendientes = async () => {
+      const response = await getCitasProgramadasDoctor(licMedico);
+      setCitasPendientes(response.data.data);
+      console.log(response.data.data);
+    };
+
     fetchCitasPendientes();
-  }, []);
+  }, [licMedico]);
 
   const router = useRouter();
   return (
@@ -61,16 +71,21 @@ const MedicoPage = () => {
                 CITAS PENDIENTES
               </h1>
               <div className="flex flex-col gap-y-4">
-                {citasPendientes.map((cita:any) => (
+                {citasPendientes.map((cita: any) => (
                   <div
                     key={cita.ID}
                     className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-gris px-10 py-3 text-blue-primary transition-all hover:bg-stone-300"
-                    onClick={() => router.push("/dashboard/medico/tratamiento")}
+                    onClick={() =>
+                      router.push(
+                        `/dashboard/medico/tratamiento?citaID=${cita.ID}&dniPaciente=${cita.DniPaciente}&liscenciaMedico=${cita.LicenciaDoctor}`,
+                      )
+                    }
                   >
                     <p className="text-lg font-bold text-blue-primary">
                       Paciente:{" "}
                       <span className="font-normal">
-                        {cita.Paciente.Nombres} {cita.Paciente.Apellido_paterno} {cita.Paciente.Apellido_materno}
+                        {cita.Paciente.Nombres} {cita.Paciente.Apellido_paterno}{" "}
+                        {cita.Paciente.Apellido_materno}
                       </span>
                     </p>
                     <div className="w-full rounded-xl bg-blue-primary px-6 py-2 text-center text-white">
@@ -78,14 +93,22 @@ const MedicoPage = () => {
                     </div>
                     <p className="font-bold">
                       Especialidad:{" "}
-                      <span className="font-normal">{cita.Especialidad.Nombre}</span>
+                      <span className="font-normal">
+                        {cita.Especialidad.Nombre}
+                      </span>
                     </p>
                     <div className="flex gap-5">
                       <p className="font-bold">
-                        Fecha: <span className="font-normal">{(cita.Fecha).substring(0,10)}</span>{" "}
+                        Fecha:{" "}
+                        <span className="font-normal">
+                          {cita.Fecha.substring(0, 10)}
+                        </span>{" "}
                       </p>
                       <p className="font-bold">
-                        Hora: <span className="font-normal">{(cita.Hora).substring(11,16)}</span>
+                        Hora:{" "}
+                        <span className="font-normal">
+                          {cita.Hora.substring(11, 16)}
+                        </span>
                       </p>
                     </div>
                   </div>

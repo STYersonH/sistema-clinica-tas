@@ -14,7 +14,7 @@ import {
 
 import { obtenerInfoCitaPorDNIPaciente } from "@/app/apiRoutes/citas/citasApi";
 import { getInformacionUsuario } from "@/app/apiRoutes/authLogin/authLoginApi";
-import {getCitasCuliminadasPaciente} from "@/app/apiRoutes/citasCulminadas/citasCulminadas.api";
+import { getCitasCuliminadasPaciente } from "@/app/apiRoutes/citasCulminadas/citasCulminadas.api";
 
 interface DatosPaciente {
   Dni: string | null | undefined;
@@ -92,13 +92,20 @@ const PacientePage = () => {
     fetchSeguroPaciente();
   }, [dniPaciente]);
 
-  const fetchCitasCulminadas = async () => {
-    const response = await getCitasCuliminadasPaciente(dniPaciente);
-    console.log(response.data.data);
-    if (response.data.data.length > 0) {
-      setCitaTerminada(true);
-    }
-  }
+  useEffect(() => {
+    const fetchCitasCulminadas = async () => {
+      console.log("obteniendo citas terminadas", dniPaciente);
+      const respuesta = await getCitasCuliminadasPaciente(dniPaciente);
+      console.log("obteniendo cita", respuesta);
+      if (respuesta.data.data.length > 0) {
+        setCitaTerminada(true);
+        console.log("cita terminada");
+      }
+    };
+
+    fetchCitasCulminadas();
+  }, [dniPaciente]);
+
   useEffect(() => {
     const obtenerCitaPaciente = async () => {
       if (dniPaciente) {
@@ -116,7 +123,7 @@ const PacientePage = () => {
         }
       }
     };
-    fetchCitasCulminadas();
+
     obtenerCitaPaciente();
   }, [dniPaciente]);
 

@@ -6,3 +6,4 @@ const documentApi = axios.create({
 
 export const getCitasProgramadasDoctor = (numeroLicencia:string) => documentApi.get(`pendientedoctor/${numeroLicencia}/`)
 export const getCitasProgramadasPaciente = (dniPaciente:string) => documentApi.get(`pendientepaciente/${dniPaciente}/`)
+

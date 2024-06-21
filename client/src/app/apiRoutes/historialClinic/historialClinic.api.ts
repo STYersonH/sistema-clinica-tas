@@ -5,3 +5,4 @@ const documentApi = axios.create({
 })
 
 export const getHistorialUsuario = (id:string) => documentApi.get(`/?ID=${id}`)
+export const createHistorialClinico = (data:any) => documentApi.post(`/`, data)

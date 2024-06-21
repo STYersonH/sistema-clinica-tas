@@ -1,6 +1,9 @@
 "use client";
 
-import React from "react";
+import { getInformacionUsuario } from "@/app/apiRoutes/authLogin/authLoginApi";
+import { getEspecialidades } from "@/app/apiRoutes/especialidades/especialidadesApi";
+
+import React, { useEffect, useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
 import { z } from "zod";
@@ -32,7 +35,7 @@ import { Button } from "@/components/ui/button";
 
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import { postMedico } from "@/app/apiRoutes/medicos/medicosApi";
+import { postMedico, updateMedico } from "@/app/apiRoutes/medicos/medicosApi";
 
 const formSchema = z.object({
   nombres: z.string().min(1, { message: "Debe ingresar sus nombres" }).max(50),
@@ -61,13 +64,59 @@ const formSchema = z.object({
     .max(50),
 });
 
-const FormMedico = () => {
+const FormModificarCuentaMedico = () => {
   const searchParams = useSearchParams(); // usar params del URL
-  let id = searchParams.get("id");
-  console.log("id: ", id);
+  let usuarioID = searchParams.get("id");
+
+  const [datosMedico, setDatosMedico] = useState({});
+  const [especialidades, setEspecialidades] = useState([]);
 
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const ObtenerEspecialidades = async () => {
+      // obtener los tipos de seguro
+      const res = await getEspecialidades();
+      setEspecialidades(res.data.data);
+      console.log(res.data.data);
+    };
+
+    ObtenerEspecialidades();
+  }, []);
+
+  useEffect(() => {
+    const fetchDatosMedico = async () => {
+      if (usuarioID) {
+        // obtener los datos del paciente
+        const res = await getInformacionUsuario(usuarioID);
+        console.log(res.data.data);
+        setDatosMedico(res.data.data);
+      }
+    };
+
+    fetchDatosMedico();
+  }, [usuarioID]);
+
+  // Nuevo useEffect para actualizar el formulario
+  useEffect(() => {
+    if (datosMedico) {
+      form.reset({
+        nombres: datosMedico?.Nombres || "",
+        apellidos: datosMedico?.Apellidos || "",
+        DNI: datosMedico?.Dni || "",
+        genero: datosMedico?.Genero || "",
+        numeroLiscencia: datosMedico?.NroLiscencia || "",
+        anioBirthDate: datosMedico?.FechaNacimiento?.slice(0, 4) || "",
+        mesBirthDate: datosMedico?.FechaNacimiento?.slice(5, 7) || "",
+        diaBirthDate: datosMedico?.FechaNacimiento?.slice(8, 10) || "",
+        nroCelular: datosMedico?.Telefono || "",
+        email: datosMedico?.CorreoElectronico || "",
+        especialidad: datosMedico?.Especialidad || "",
+        direccionVivienda: datosMedico?.Direccion || "",
+      });
+    }
+  }, [datosMedico]);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -112,20 +161,32 @@ const FormMedico = () => {
       especialidad_id: values.especialidad,
     };
 
-    const res = await postMedico(data);
+    console.log("datos antes de enviar", data);
 
-    console.log(res.status);
+    try {
+      const res = await updateMedico(datosMedico?.IdDoctor, data);
+      console.log(res.status);
 
-    if (res.status === 201) {
-      //console.log(res.data);
-      toast({
-        title: "Paciente creado correctamente",
-        description: `Su usuario y contraseña son "${values.numeroLiscencia}"`, //TODO en cuanto se pueda actualizar al medico, actualizar este mensaje
-      });
-    } else {
+      if (res.status === 200) {
+        //console.log(res.data);
+        toast({
+          title: "Medico actualizado correctamente",
+          description: `Ha actualizado su informacion correctamente"`, //TODO en cuanto se pueda actualizar al medico, actualizar este mensaje
+        });
+        router.push("/dashboard/medico");
+      } else {
+        toast({
+          variant: "destructive",
+          title:
+            "Se produjo un error al intentar modificar los datos del medico",
+          description: "Intente nuevamente.",
+        });
+      }
+    } catch (err: any) {
+      console.log("Hubo un error al modificar los datos del medico", err);
       toast({
         variant: "destructive",
-        title: "Se produjo un error al crear el paciente",
+        title: "Se produjo un error al intentar modificar los datos del medico",
         description: "Intente nuevamente.",
       });
     }
@@ -214,7 +275,12 @@ const FormMedico = () => {
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="año" />
+                              <SelectValue
+                                placeholder={datosMedico?.FechaNacimiento?.slice(
+                                  0,
+                                  4,
+                                )}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -248,24 +314,27 @@ const FormMedico = () => {
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="mes" />
+                              <SelectValue
+                                placeholder={datosMedico?.FechaNacimiento?.slice(
+                                  5,
+                                  7,
+                                )}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Enero">Enero</SelectItem>
-                            <SelectItem value="Febrero">Febrero</SelectItem>
-                            <SelectItem value="Marzo">Marzo</SelectItem>
-                            <SelectItem value="Abril">Abril</SelectItem>
-                            <SelectItem value="Mayo">Mayo</SelectItem>
-                            <SelectItem value="Junio">Junio</SelectItem>
-                            <SelectItem value="Julio">Julio</SelectItem>
-                            <SelectItem value="Agosto">Agosto</SelectItem>
-                            <SelectItem value="Septiembre">
-                              Septiembre
-                            </SelectItem>
-                            <SelectItem value="Octubre">Octubre</SelectItem>
-                            <SelectItem value="Noviembre">Noviembre</SelectItem>
-                            <SelectItem value="Diciembre">Diciembre</SelectItem>
+                            <SelectItem value="01">Enero</SelectItem>
+                            <SelectItem value="02">Febrero</SelectItem>
+                            <SelectItem value="03">Marzo</SelectItem>
+                            <SelectItem value="04">Abril</SelectItem>
+                            <SelectItem value="05">Mayo</SelectItem>
+                            <SelectItem value="06">Junio</SelectItem>
+                            <SelectItem value="07">Julio</SelectItem>
+                            <SelectItem value="08">Agosto</SelectItem>
+                            <SelectItem value="09">Septiembre</SelectItem>
+                            <SelectItem value="10">Octubre</SelectItem>
+                            <SelectItem value="11">Noviembre</SelectItem>
+                            <SelectItem value="12">Diciembre</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -288,7 +357,12 @@ const FormMedico = () => {
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="dia" />
+                              <SelectValue
+                                placeholder={datosMedico?.FechaNacimiento?.slice(
+                                  8,
+                                  10,
+                                )}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -323,7 +397,7 @@ const FormMedico = () => {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar su genero" />
+                          <SelectValue placeholder={datosMedico?.Genero} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -460,17 +534,20 @@ const FormMedico = () => {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar especialidad" />
+                            <SelectValue
+                              placeholder={datosMedico?.Especialidad}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="General">General</SelectItem>
-                          <SelectItem value="Traumatologia">
-                            Traumatologia
-                          </SelectItem>
-                          <SelectItem value="Dermatologia">
-                            Dermatologia
-                          </SelectItem>
+                          {especialidades.map((especialidad) => (
+                            <SelectItem
+                              key={especialidad.ID}
+                              value={especialidad.ID.toString()}
+                            >
+                              {especialidad.Nombre}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -489,9 +566,12 @@ const FormMedico = () => {
               Modificar cuenta
             </Button>
 
+            {/*
             <Button className="rounded-3xl bg-red-500 px-16 py-7 font-bold hover:bg-red-600">
-              Eliminar cuenta
-            </Button>
+                          Eliminar cuenta
+                        </Button>
+            */}
+
             <Button className="rounded-3xl bg-stone-500 px-16 py-7 font-bold hover:bg-stone-600">
               Cambiar contraseña
             </Button>
@@ -502,4 +582,4 @@ const FormMedico = () => {
   );
 };
 
-export default FormMedico;
+export default FormModificarCuentaMedico;

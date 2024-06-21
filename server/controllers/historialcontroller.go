@@ -119,9 +119,15 @@ func GetHistorial(c *gin.Context) {
 func CreateHistorial(c *gin.Context) {
 	var clinicHistorialGet modelsApi.ClinicHistorialGet
 
+	//Recuperar el JSON enviado
+	if err := c.ShouldBindJSON(&clinicHistorialGet); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	//Obtener cita
 	var cita models.Cita
-	if result := initializers.DB.First(&cita, c.Param("id")); result.Error != nil {
+	if result := initializers.DB.First(&cita, "id = ?", clinicHistorialGet.IdCita); result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Cita not found!"})
 		return
 	}
@@ -129,12 +135,6 @@ func CreateHistorial(c *gin.Context) {
 	//Evaluar si la cita ya tiene un historial clinico
 	if cita.HistorialClinicoId != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Historial clinico ya creado!"})
-		return
-	}
-
-	//Recuperar el JSON enviado
-	if err := c.ShouldBindJSON(&clinicHistorialGet); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

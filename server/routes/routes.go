@@ -23,7 +23,6 @@ func SetupRoutes(router *gin.Engine) {
 	{
 		citas.GET("/", controllers.GetAllCitas)
 		citas.GET("/:id/", controllers.GetCita)
-
 		citas.POST("/", controllers.CreateCita)
 		citas.PUT("/:id/", controllers.UpdateCita)
 		citas.DELETE("/:id/", controllers.DeleteCita)

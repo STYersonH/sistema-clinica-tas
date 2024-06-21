@@ -1,40 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import { useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
+import {getHistorialUsuario} from "../../../apiRoutes/historialClinic/historialClinic.api";
 
 const TratamientoPage = () => {
-  const router = useRouter();
 
-  const tratamiento = [
-    {
-      tipo: "terapia",
-      descripcion: "Debes tomar sol por 30 minutos al dia",
-    },
-    {
-      tipo: "cirugia",
-      descripcion:
-        "Se debe programar una operacion de emergencia para transplantar un riñon",
-    },
-    {
-      tipo: "medicamento",
-      receta: [
-        {
-          nombre: "Ibuprofeno",
-          dosis: "1 tableta",
-          frecuencia: "cada 8 horas",
-          duracion: "7 dias",
-        },
-        {
-          nombre: "Paracetamol",
-          dosis: "1 tableta",
-          frecuencia: "cada 6 horas",
-          duracion: "5 dias",
-        },
-      ],
-    },
-  ];
+  const [historialClinico, setHistorialClinico] = useState<any>([])
+  
+  const fetchHistorialClinico = async () => {
+    const response = await getHistorialUsuario("53415764")
+    console.log(response.data.data)
+    setHistorialClinico(response.data.data[0])
+  }
+
+  useEffect(() => {
+    fetchHistorialClinico()
+  }, [])
+
+  const router = useRouter();
 
   return (
     <main className="flex w-screen justify-center">
@@ -56,14 +42,14 @@ const TratamientoPage = () => {
         {/* Datos del medico a cargo*/}
         <div className="flex w-[850px] flex-col items-center justify-center gap-3 rounded-3xl border-2 border-yellow-primary py-6">
           <p className="text-2xl font-bold text-yellow-primary">
-            Dr: Hector Antonio Vargas Ampuero
+            {historialClinico.Medico?.NombresApellidos}
           </p>
           <div className="flex gap-x-10 text-yellow-primary">
             <p className="text-lg font-bold">
-              Nro Celular: <span className="font-normal">945633232</span>
+              Nro Celular: <span className="font-normal">{historialClinico.Medico?.Telefono}</span>
             </p>
             <p className="text-lg font-bold">
-              Especialidad: <span className="font-normal">Odontologia</span>
+              Especialidad: <span className="font-normal">{historialClinico.Medico?.Especialidad}</span>
             </p>
           </div>
         </div>
@@ -74,8 +60,7 @@ const TratamientoPage = () => {
             DIAGNOSTICO
           </h2>
           <p className="text-lg font-bold text-white">
-            Se le diagnostico un serio cuadro de estres debido a mucha
-            preocupacion
+            {historialClinico.Diagnostico}
           </p>
         </div>
 
@@ -85,10 +70,10 @@ const TratamientoPage = () => {
             RECETA MEDICA
           </h2>
 
-          {tratamiento.map((tratamiento, index) => {
+          {historialClinico.Tratamientos?.map((tratamiento:any, index:number) => {
             if (
-              tratamiento.tipo === "terapia" ||
-              tratamiento.tipo === "cirugia"
+              tratamiento.Tipo === "terapia" ||
+              tratamiento.Tipo === "cirugia"
             ) {
               return (
                 <div
@@ -99,9 +84,9 @@ const TratamientoPage = () => {
                     className="inline-block w-auto rounded-full border border-yellow-primary px-5"
                     style={{ width: "fit-content" }}
                   >
-                    {tratamiento.tipo}
+                    {tratamiento.Tipo}
                   </div>
-                  <p className="font-bold">{tratamiento.descripcion}</p>
+                  <p className="font-bold">{tratamiento.Descripcion}</p>
                 </div>
               );
             } else {
@@ -114,19 +99,19 @@ const TratamientoPage = () => {
                     className="inline-block w-auto rounded-full border border-yellow-primary px-5"
                     style={{ width: "fit-content" }}
                   >
-                    {tratamiento.tipo}
+                    {tratamiento.Tipo}
                   </div>
                   <div className="mt-3">
-                    {tratamiento?.receta?.map((receta, index) => (
+                    {tratamiento?.Receta?.map((receta:any, index:number) => (
                       <div
                         key={index}
                         className="grid grid-cols-4 gap-x-5 text-yellow-primary"
                         style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr" }}
                       >
-                        <p className="ml-6 font-bold">{receta.nombre}</p>
-                        <p className="font-normal">{receta.dosis}</p>
-                        <p className="font-normal">{receta.frecuencia}</p>
-                        <p className="font-normal">{receta.duracion}</p>
+                        <p className="ml-6 font-bold">{receta.NombreMedicamento}</p>
+                        <p className="font-normal">{receta.Dosis}</p>
+                        <p className="font-normal">{receta.Frecuencia}</p>
+                        <p className="font-normal">{receta.Duracion}</p>
                       </div>
                     ))}
                   </div>

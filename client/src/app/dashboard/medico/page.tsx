@@ -1,15 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Button from "@/components/Button";
 import { cn } from "@/lib/utils";
 import { tree } from "next/dist/build/templates/app-page";
+import { getCitasProgramadasDoctor } from "@/app/apiRoutes/citas/citas.api";
 
 const MedicoPage = () => {
+  const [citasPendientes2, setCitasPendientes] = useState([])
   const [citasExisten, setCitasExisten] = useState(true);
+
+  const fetchCitasPendientes = async () => {
+    const response = await getCitasProgramadasDoctor("5520859570");
+    if (response.status === 200) {
+      setCitasPendientes(response.data.data);
+      console.log(response.data.data);
+      setCitasExisten(true);
+    } else {
+      setCitasExisten(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchCitasPendientes();
+  }, []);
   const citasPendientes = [
     {
       id: 1,

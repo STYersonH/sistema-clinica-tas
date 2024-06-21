@@ -32,7 +32,6 @@ func SetupRoutes(router *gin.Engine) {
 		citaspendientes.GET("/pendientedoctor/:licencia_doctor/", controllers.GetCitasPendientesporLicenciaDoctor)
 		citaspendientes.GET("/pendientepaciente/:dni_paciente/", controllers.GetCitasPendientesporDniPaciente)
 	}
-
 	doctores := router.Group("/doctores")
 	{
 		doctores.GET("/", controllers.GetAllDoctors)

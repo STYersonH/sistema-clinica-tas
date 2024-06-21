@@ -25,26 +25,12 @@ import {
 } from "@/components/ui/select";
 
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const formSchema = z.object({
   diagnostico: z.string().min(1, "Por favor escriba un diagnostico"),
-  // fecha obligatoria
   tipoTratamiento: z
     .string()
     .min(1, "Por favor seleccione un tipo de tratamiento"),
@@ -111,25 +97,26 @@ const TraramientoPage = () => {
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    console.log(values);
+    // console.log(values);
   }
 
-  const handleAgregarTratamiento = (e: any) => {
-    e.preventDefault();
+  const handleAgregarTratamiento = () => {
+    const values = form.getValues();
 
     if (tipoTratamiento === "medicamento") {
       if (
-        form.getValues("medicamento") != "" &&
-        form.getValues("frecuencia") != "" &&
-        form.getValues("duracion") != ""
+        values.medicamento &&
+        values.frecuencia &&
+        values.duracion
       ) {
         setTratamientos([
           ...tratamientos,
           {
             tipo: tipoTratamiento,
-            nombre: form.getValues("medicamento"),
-            frecuencia: form.getValues("frecuencia"),
-            duracion: form.getValues("duracion"),
+            nombre: values.medicamento,
+            dosis: values.dosis,
+            frecuencia: values.frecuencia,
+            duracion: values.duracion,
           },
         ]);
         setTipoTratamiento("");
@@ -138,13 +125,12 @@ const TraramientoPage = () => {
     }
 
     if (tipoTratamiento !== "medicamento") {
-      console.log(form.getValues("descripcion"));
-      if (form.getValues("descripcion") != "") {
+      if (values.descripcion) {
         setTratamientos([
           ...tratamientos,
           {
             tipo: tipoTratamiento,
-            descripcion: form.getValues("descripcion"),
+            descripcion: values.descripcion,
           },
         ]);
         setTipoTratamiento("");
@@ -174,7 +160,7 @@ const TraramientoPage = () => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="w-[800px] space-y-8 rounded-3xl border-2 border-solid bg-white p-10"
         >
-          {/* Motivo */}
+          {/* Diagnostico */}
           <div>
             <FormField
               control={form.control}
@@ -186,9 +172,9 @@ const TraramientoPage = () => {
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Escribir el motivo de por que necesita una consulta"
-                      id="message-2"
+                      placeholder="Escribir el diagnostico de la cita médica"
                       className="border-blue-primary"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -306,7 +292,7 @@ const TraramientoPage = () => {
                     />
                   </div>
                   {tipoTratamiento !== "" &&
-                    tipoTratamiento == "medicamento" && (
+                    tipoTratamiento === "medicamento" && (
                       <div className="flex flex-1 flex-col gap-3 pt-1">
                         <div className="flex w-full flex-col gap-4">
                           {/* detalles de tratamietno */}
@@ -328,14 +314,14 @@ const TraramientoPage = () => {
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        <SelectItem value="1">
-                                          Medicamento 1
+                                        <SelectItem value="Paracetamol">
+                                          Paracetamol
                                         </SelectItem>
-                                        <SelectItem value="2">
-                                          Medicamento 2
+                                        <SelectItem value="Ibuprofeno">
+                                          Ibuprofeno
                                         </SelectItem>
-                                        <SelectItem value="3">
-                                          Medicamento 3
+                                        <SelectItem value="Amoxicilina">
+                                          Amoxicilina
                                         </SelectItem>
                                       </SelectContent>
                                     </Select>
@@ -406,7 +392,6 @@ const TraramientoPage = () => {
                             </div>
                           </div>
                         </div>
-                        {/* avanzamos hasta aqui */}
                       </div>
                     )}
 
@@ -423,8 +408,8 @@ const TraramientoPage = () => {
                             <FormControl>
                               <Textarea
                                 placeholder="Escribir descripcion del tratamiento"
-                                id="message-2"
                                 className="border-blue-primary"
+                                {...field}
                               />
                             </FormControl>
                             <FormMessage />
@@ -435,7 +420,7 @@ const TraramientoPage = () => {
 
                   {tipoTratamiento !== "" && (
                     <Button
-                      type="submit"
+                      type="button"
                       className="mt-4 w-full rounded-3xl bg-blue-primary px-16 py-7 font-bold hover:bg-blue-primary"
                       onClick={handleAgregarTratamiento}
                     >

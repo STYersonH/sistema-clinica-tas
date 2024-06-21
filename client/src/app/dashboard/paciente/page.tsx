@@ -31,7 +31,6 @@ interface PacienteProps {
 
 const PacientePage = () => {
   const { data: session, status } = useSession();
-
   const datosPaciente = session?.user;
 
   // obtener fecha de nacimiento

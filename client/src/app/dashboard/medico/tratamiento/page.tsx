@@ -30,15 +30,13 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const formSchema = z.object({
-  diagnostico: z.string().min(1, "Por favor escriba un diagnostico"),
-  tipoTratamiento: z
-    .string()
-    .min(1, "Por favor seleccione un tipo de tratamiento"),
-  descripcion: z.string().min(1, "Por favor escriba una descripcion"),
-  medicamento: z.string().min(1, "Por favor seleccione un medicamento"),
-  dosis: z.string().min(1, "Por favor escriba la dosis"),
-  frecuencia: z.string().min(1, "Por favor escriba la frecuencia"),
-  duracion: z.string().min(1, "Por favor escriba la duracion"),
+  diagnostico: z.string().min(1, "Por favor escriba el diagnostico"),
+  tipoTratamiento: z.string(),
+  descripcion: z.string(),
+  medicamento: z.string(),
+  dosis: z.string(),
+  frecuencia: z.string(),
+  duracion: z.string(),
 });
 
 interface Tratamiento {
@@ -73,11 +71,12 @@ const TraramientoPage = () => {
   ]);
 
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const citaID = searchParams.get("citaID");
+  const dniPaciente = searchParams.get("dniPaciente");
+  const liscenciaMedico = searchParams.get("liscenciaMedico");
+  console.log(citaID, dniPaciente, liscenciaMedico);
 
-  // Obtener el valor del parametro tipo
-  const tipo = searchParams.get("tipo");
-  console.log(tipo);
+  const router = useRouter();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -97,18 +96,14 @@ const TraramientoPage = () => {
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    // console.log(values);
+    console.log(values);
   }
 
   const handleAgregarTratamiento = () => {
     const values = form.getValues();
 
     if (tipoTratamiento === "medicamento") {
-      if (
-        values.medicamento &&
-        values.frecuencia &&
-        values.duracion
-      ) {
+      if (values.medicamento && values.frecuencia && values.duracion) {
         setTratamientos([
           ...tratamientos,
           {

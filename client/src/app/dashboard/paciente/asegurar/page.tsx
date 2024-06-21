@@ -1,5 +1,7 @@
 "use client";
 
+import { asegurar } from "@/app/apiRoutes/asegurados/aseguradosApi";
+
 import React, { useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
@@ -41,6 +43,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSession } from "next-auth/react";
 
 const formSchema = z.object({
   tipoSeguro: z.string().min(1, "Por favor seleccione un tipo de seguro"),
@@ -49,7 +52,16 @@ const formSchema = z.object({
     .min(1, "Por favor seleccione la cantidad de años"),
 });
 
+// Extend the User type to include the ID property
+type ExtendedUser = {
+  IdPaciente?: string | null;
+};
+
 const AsegurarPage = () => {
+  // obtener los datos de la session
+  const { data: session, status } = useSession();
+  const IdPaciente = (session?.user as ExtendedUser)?.IdPaciente;
+
   const [procedido, setProcedido] = useState(false);
   const [tipoSeguro, setTipoSeguro] = useState(""); // 1. Add state for tipoSeguro
   const [cantAniosSeguro, setCantAniosSeguro] = useState(""); // 1. Add state for cantAniosSeguro
@@ -71,10 +83,23 @@ const AsegurarPage = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
+
+    const datosSeguro = {
+      idPaciente: IdPaciente,
+      tipo: tipoSeguro,
+      cantAnios: cantAniosSeguro,
+    };
+
+    try {
+      const res = await asegurar(datosSeguro);
+      console.log(res);
+    } catch (error) {
+      console.log("Error al asegurar");
+    }
   }
 
   return (

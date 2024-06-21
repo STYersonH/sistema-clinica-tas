@@ -1,26 +1,54 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Button from "@/components/Button";
 import { cn } from "@/lib/utils";
 
+import {
+  getInfoAsegurado,
+  getInfoSeguro,
+} from "@/app/apiRoutes/asegurados/aseguradosApi";
+
 const PacientePage = () => {
   const { data: session, status } = useSession();
   console.log("En paciente page, paciente", session);
 
   const datosPaciente = session?.user;
+  const DNIpaciente = datosPaciente.Dni;
+  console.log("DNI", DNIpaciente);
 
   // obtener fecha de nacimiento
   let fechaNacimiento = datosPaciente.FechaNacimiento;
   fechaNacimiento = fechaNacimiento.slice(0, 10);
 
-
   const [citaExiste, setCitaExiste] = useState(true);
-  const [seguroExiste, setSeguroExiste] = useState(true);
+  const [seguroExiste, setSeguroExiste] = useState(false);
+  const [datosSeguro, setDatosSeguro] = useState({});
+  const [datosAsegurado, setDatosAsegurado] = useState({});
   const [citaTerminada, setCitaTerminada] = useState(true);
+
+  useEffect(() => {
+    const fetchSeguroPaciente = async () => {
+      if (DNIpaciente) {
+        try {
+          // obtener los datos del paciente
+          const res1 = await getInfoAsegurado(DNIpaciente);
+          console.log(res1.data);
+          setDatosAsegurado(res1.data.data);
+          const res2 = await getInfoSeguro(DNIpaciente);
+          setDatosSeguro(res2.data.data);
+          setSeguroExiste(true);
+        } catch (error) {
+          console.log("Error al obtener los datos del asegurado", error);
+        }
+      }
+    };
+
+    fetchSeguroPaciente();
+  }, []);
 
   const router = useRouter();
   return (

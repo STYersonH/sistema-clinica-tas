@@ -1,8 +1,10 @@
 "use client";
 
 import { getEspecialidades } from "@/app/apiRoutes/especialidades/especialidadesApi";
-import { postCita } from "@/app/apiRoutes/citas/citasApi";
-
+import {
+  obtenerInfoCitaPorDNIPaciente,
+  putCita,
+} from "@/app/apiRoutes/citas/citasApi";
 import React, { useEffect, useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
@@ -30,7 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -48,12 +50,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { useSession } from "next-auth/react";
 
 const formSchema = z.object({
-  especialidad: z.string().min(1, { message: "elegir Especialidad" }),
+  especialidad: z.string(),
   motivoConsulta: z
     .string()
     .min(1, { message: "escribir motivo de la consulta" }),
   // fecha obligatoria
-  fechaCita: z.date({ message: "elegir fecha" }),
+  fechaCita: z.date().optional(),
   horaCita: z.string().min(1, { message: "elegir hora" }),
   minutoCita: z.string().min(1, { message: "elegir minutos" }),
 });
@@ -62,14 +64,22 @@ type ExtendedUser = {
   Dni?: string | null;
 };
 
+interface Especialidad {
+  Nombre: string;
+  // include other properties as needed
+}
+
 const FormCrearCuenta = () => {
   const router = useRouter();
-  const [especialidades, setEspecialidades] = useState([]);
   const { toast } = useToast();
+  const [especialidades, setEspecialidades] = useState<Especialidad[]>([]);
+  const [datosCita, setDatosCita] = useState({});
+  const [DNI, setDNI] = useState<string | null | undefined>("");
 
   // obtener el id del paciente desde los datos de sesion
   const { data: session, status } = useSession();
-  const DNI = (session?.user as ExtendedUser)?.Dni;
+  const datosPaciente = session?.user;
+  //const DNI = (session?.user as ExtendedUser)?.Dni;
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -86,45 +96,118 @@ const FormCrearCuenta = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     let date = new Date(values.fechaCita);
     const fechaConFormato = date.toISOString().split("T")[0];
+    console.log("llenando datos con el estado: ", datosCita);
 
     const data = {
       DNIpaciente: DNI,
-      especialidadId: parseInt(values.especialidad),
+      especialidadId: parseInt(datosCita.idEspecialidad),
       motivo: values.motivoConsulta,
-      fecha: fechaConFormato,
+      fecha: fechaConFormato ? fechaConFormato : datosCita.Original,
       hora: values.horaCita,
       minuto: values.minutoCita,
     };
-    console.log(data);
+    console.log("datos para enviar", data);
 
     try {
-      const res = await postCita(data);
+      const res = await putCita(datosCita.ID, data);
       console.log(res.status);
       toast({
-        title: "Se reservo la cita correctamente",
+        title: "Se actualizo la cita correctamente",
         description: `Tiene una cita el ${fechaConFormato} a las ${values.horaCita}:${values.minutoCita}`,
       });
       router.push("/dashboard/paciente/");
     } catch (err: any) {
-      console.log("Hubo un error al crear la cita", err);
+      console.log("Hubo un error al actualizar la cita", err);
       toast({
         variant: "destructive",
-        title: "Se produjo un error al intentar reservar la cita",
+        title: "Se produjo un error al intentar actualizar la cita",
         description: "Intente nuevamente.",
       });
     }
   }
 
   useEffect(() => {
+    const DNIpaciente = datosPaciente?.Dni;
+    console.log("DNI", DNIpaciente);
+    setDNI(DNIpaciente);
+  }, [datosPaciente]);
+
+  useEffect(() => {
     const ObtenerEspecialidades = async () => {
       // obtener los tipos de seguro
       const res = await getEspecialidades();
       setEspecialidades(res.data.data);
-      console.log(res.data.data);
     };
-
     ObtenerEspecialidades();
   }, []);
+
+  useEffect(() => {
+    const ObtenerDatosCita = async () => {
+      const resDatosCita = await obtenerInfoCitaPorDNIPaciente(DNI);
+      const datosDeCita = resDatosCita.data.data[0];
+      console.log("res datos cita", resDatosCita.data.data[0]);
+
+      const datosCita = {
+        ID: datosDeCita?.ID,
+        especialidad: datosDeCita?.EspecialidadId,
+        motivoConsulta: datosDeCita?.Motivo,
+        fechaCita: datosDeCita?.Fecha?.slice(0, 10),
+        horaCita: datosDeCita?.Hora?.slice(11, 13),
+        minutoCita: datosDeCita?.Hora?.slice(14, 16),
+      };
+
+      console.log(datosCita);
+
+      const index = parseInt(datosCita.especialidad) - 1;
+      const especialidad =
+        index >= 0 && index < especialidades.length
+          ? especialidades[index].Nombre
+          : "Default Name";
+
+      const date = new Date(datosCita.fechaCita + "T00:00:00");
+
+      // 2. Ajustar la fecha a la zona horaria de Perú (GMT-0500)
+      const peruTimeZone = "America/Lima";
+      const options = {
+        timeZone: peruTimeZone,
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZoneName: "short",
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const formattedDate = formatter?.format(date);
+
+      const nuevosDatos = {
+        ...datosCita,
+        idEspecialidad: datosCita.especialidad,
+        fechaOriginal: datosCita.fechaCita,
+        especialidad,
+        fechaCita: formattedDate,
+      };
+      setDatosCita(nuevosDatos);
+    };
+
+    ObtenerDatosCita();
+  }, [especialidades, DNI]);
+
+  useEffect(() => {
+    if (datosCita) {
+      form.reset({
+        especialidad: datosCita.especialidad,
+        motivoConsulta: datosCita.motivoConsulta,
+        fechaCita: datosCita.fechaCita,
+        horaCita: datosCita.horaCita,
+        minutoCita: datosCita.minutoCita,
+      });
+    }
+  }, [datosCita]);
 
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-yellow-primary">
@@ -138,7 +221,7 @@ const FormCrearCuenta = () => {
           <FaAngleLeft className="transition-transform duration-200 group-hover:scale-125" />
         </div>
         <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-primary">
-          Reserva de cita medica
+          Modificar cita medica
         </h2>
       </div>
 
@@ -161,9 +244,11 @@ const FormCrearCuenta = () => {
                         field.onChange(value);
                       }}
                       value={field.value}
+                      // no modificar
+                      disabled
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar especialidad" />
+                        <SelectValue placeholder={datosCita?.especialidad} />
                       </SelectTrigger>
                       <SelectContent>
                         {especialidades.map((especialidad) => (
@@ -268,7 +353,7 @@ const FormCrearCuenta = () => {
                           >
                             <FormControl>
                               <SelectTrigger className="w-full">
-                                <SelectValue placeholder="hora" />
+                                <SelectValue placeholder={datosCita.horaCita} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -304,7 +389,9 @@ const FormCrearCuenta = () => {
                           >
                             <FormControl>
                               <SelectTrigger className="w-full">
-                                <SelectValue placeholder="minuto" />
+                                <SelectValue
+                                  placeholder={datosCita.minutoCita}
+                                />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -322,12 +409,15 @@ const FormCrearCuenta = () => {
             </div>
           </div>
 
-          <div className="w-full pt-5 text-center">
+          <div className="flex w-full justify-center gap-5 pt-5">
             <Button
               type="submit"
               className="rounded-3xl bg-green-500 px-16 py-7 font-bold hover:bg-green-600"
             >
-              Agendar cita
+              Modificar cita
+            </Button>
+            <Button className="rounded-3xl bg-red-500 px-16 py-7 font-bold hover:bg-red-600">
+              Cancelar cita
             </Button>
           </div>
         </form>

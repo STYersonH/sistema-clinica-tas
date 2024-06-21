@@ -1,11 +1,33 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Button from "@/components/Button";
 import { cn } from "@/lib/utils";
+
+import {
+  getInfoAsegurado,
+  getInfoSeguro,
+} from "@/app/apiRoutes/asegurados/aseguradosApi";
+
+import { obtenerInfoCitaPorDNIPaciente } from "@/app/apiRoutes/citas/citasApi";
+
+interface DatosPaciente {
+  Dni: string | null | undefined;
+  Nombres: string | null | undefined;
+  Apellidos: string | null | undefined;
+  Genero: string | null | undefined;
+  Telefono: string | null | undefined;
+  Direccion: string | null | undefined;
+  FechaNacimiento: string | null | undefined;
+}
+
+// Ejemplo de componente que recibe datosPaciente como prop
+interface PacienteProps {
+  datosPaciente: DatosPaciente; // Paso 2: Tipar datosPaciente en su origen
+}
 
 const PacientePage = () => {
   const { data: session, status } = useSession();
@@ -14,13 +36,66 @@ const PacientePage = () => {
   const datosPaciente = session?.user;
 
   // obtener fecha de nacimiento
-  let fechaNacimiento = datosPaciente.FechaNacimiento;
-  fechaNacimiento = fechaNacimiento.slice(0, 10);
+  let fechaNacimiento = datosPaciente?.FechaNacimiento;
+  fechaNacimiento = fechaNacimiento?.slice(0, 10);
 
+  const [dniPaciente, setDniPaciente] = useState("");
 
-  const [citaExiste, setCitaExiste] = useState(true);
-  const [seguroExiste, setSeguroExiste] = useState(true);
-  const [citaTerminada, setCitaTerminada] = useState(true);
+  const [citaExiste, setCitaExiste] = useState(false);
+  const [seguroExiste, setSeguroExiste] = useState(false);
+  const [datosSeguro, setDatosSeguro] = useState({});
+  const [datosAsegurado, setDatosAsegurado] = useState({});
+  const [citaTerminada, setCitaTerminada] = useState(false);
+
+  useEffect(() => {
+    const DNIpaciente = datosPaciente?.Dni;
+    console.log("DNI", DNIpaciente);
+    setDniPaciente(DNIpaciente);
+  }, [datosPaciente]);
+
+  useEffect(() => {
+    const fetchSeguroPaciente = async () => {
+      console.log("Obteniendo dni pasciente en useEffect:", dniPaciente);
+      if (dniPaciente) {
+        try {
+          // obtener los datos del paciente
+          const res1 = await getInfoAsegurado(dniPaciente);
+          console.log("res asegurado", res1.data);
+          setDatosAsegurado(res1.data);
+          const res2 = await getInfoSeguro(dniPaciente);
+          console.log("res seguro", res2.data);
+          setDatosSeguro(res2.data);
+          setSeguroExiste(true);
+        } catch (error) {
+          console.log("Error al obtener los datos del asegurado", error);
+        }
+      }
+    };
+
+    fetchSeguroPaciente();
+  }, [dniPaciente]);
+
+  useEffect(() => {
+    const obtenerCitaPaciente = async () => {
+      if (dniPaciente) {
+        console.log("dniPaciente", dniPaciente);
+        try {
+          // obtener los datos del paciente
+          const res3 = await obtenerInfoCitaPorDNIPaciente(dniPaciente);
+          console.log("res cita existe", res3.data);
+          setDatosAsegurado(res3.data);
+
+          if (res3.data.data.length > 0) {
+            setCitaExiste(true);
+          }
+        } catch (error) {
+          console.log("Error al obtener los datos del asegurado", error);
+        }
+      }
+    };
+
+    obtenerCitaPaciente();
+  }, [dniPaciente]);
 
   const router = useRouter();
   return (
@@ -36,27 +111,27 @@ const PacientePage = () => {
           />
           <div className="flex flex-col items-center rounded-2xl border border-gris p-8">
             <p className="text-2xl font-bold text-yellow-600">
-              DNI: <span className="font-normal">{datosPaciente.Dni}</span>
+              DNI: <span className="font-normal">{datosPaciente?.Dni}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
               Nombres:{" "}
-              <span className="font-normal">{datosPaciente.Nombres}</span>
+              <span className="font-normal">{datosPaciente?.Nombres}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
               Apellidos:{" "}
-              <span className="font-normal">{datosPaciente.Apellidos}</span>
+              <span className="font-normal">{datosPaciente?.Apellidos}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
               Genero:{" "}
-              <span className="font-normal">{datosPaciente.Genero}</span>
+              <span className="font-normal">{datosPaciente?.Genero}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
               Telefono:{" "}
-              <span className="font-normal">{datosPaciente.Telefono}</span>
+              <span className="font-normal">{datosPaciente?.Telefono}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
               Direccion:{" "}
-              <span className="font-normal">{datosPaciente.Direccion}</span>
+              <span className="font-normal">{datosPaciente?.Direccion}</span>
             </p>
             <p className="text-2xl font-bold text-yellow-600">
               Fecha de nacimiento:{" "}
@@ -76,8 +151,10 @@ const PacientePage = () => {
             <div className="mb-10 flex w-[500px] flex-col items-center justify-center rounded-2xl border border-gris p-10 text-yellow-primary">
               <h2 className="text-2xl font-bold">USTED ESTA ASEGURADO</h2>
               <div className="mt-3 flex gap-x-5">
-                <p className="font-bold">Seguro estandar</p>
-                <p className="">2 anios</p>
+                <p className="font-bold">Seguro {datosSeguro.tipo_seguro}</p>
+                <p className="">
+                  Vence el {datosAsegurado?.FechaVencimiento?.slice(0, 10)}
+                </p>
               </div>
             </div>
           )}
@@ -92,7 +169,7 @@ const PacientePage = () => {
           )}
           {citaExiste && !citaTerminada && (
             <Button
-              href="/dashboard/paciente/citas"
+              href="/dashboard/paciente/modificar-cita"
               color="yellow"
               className="w-[500px] rounded-xl text-2xl"
             >

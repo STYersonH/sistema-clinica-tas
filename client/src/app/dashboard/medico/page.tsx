@@ -8,19 +8,22 @@ import Button from "@/components/Button";
 import { cn } from "@/lib/utils";
 import { tree } from "next/dist/build/templates/app-page";
 import { getCitasProgramadasDoctor } from "@/app/apiRoutes/citasPendientes/citasPendientes.api";
+import { getInformacionUsuario } from "@/app/apiRoutes/authLogin/authLoginApi";
 
 const MedicoPage = () => {
   const [citasPendientes, setCitasPendientes] = useState([]);
   const [citasExisten, setCitasExisten] = useState(true);
   const [licMedico, setLicMedico] = useState("");
+  const [datosMedico, setDatosMedico] = useState({});
 
   const { data: session, status } = useSession();
-  const datosMedico = session?.user;
+  const datosMedicoSession = session?.user;
+  const usuarioID = session?.user?.ID;
 
   useEffect(() => {
-    const licenciaMedico = datosMedico?.NroLiscencia;
+    const licenciaMedico = datosMedicoSession?.NroLiscencia;
     setLicMedico(licenciaMedico);
-  }, [datosMedico]);
+  }, [datosMedicoSession]);
 
   useEffect(() => {
     const fetchCitasPendientes = async () => {
@@ -30,6 +33,19 @@ const MedicoPage = () => {
     };
 
     fetchCitasPendientes();
+  }, [licMedico]);
+
+  useEffect(() => {
+    const fetchDatosMedico = async () => {
+      if (usuarioID) {
+        // obtener los datos del medico
+        const res = await getInformacionUsuario(usuarioID);
+        console.log("Informacion del medico", res.data.data);
+        setDatosMedico(res.data.data);
+      }
+    };
+
+    fetchDatosMedico();
   }, [licMedico]);
 
   const router = useRouter();
@@ -46,19 +62,22 @@ const MedicoPage = () => {
           />
           <div className="flex w-[450px] flex-col items-center rounded-2xl border border-gris p-8">
             <p className="text-2xl font-bold text-blue-primary">
-              DNI: <span className="font-normal">77777777</span>
+              DNI: <span className="font-normal">{datosMedico.Dni}</span>
             </p>
             <p className="text-2xl font-bold text-blue-primary">
-              Liscencia: <span className="font-normal">77717717717</span>
+              Liscencia:{" "}
+              <span className="font-normal">{datosMedico.NroLiscencia}</span>
             </p>
             <p className="text-2xl font-bold text-blue-primary">
-              Nombres: <span className="font-normal">Mat Rony</span>
+              Nombres:{" "}
+              <span className="font-normal">{datosMedico.Nombres}</span>
             </p>
             <p className="text-2xl font-bold text-blue-primary">
-              Apellidos: <span className="font-normal">Omeda Salcedo</span>
+              Apellidos:{" "}
+              <span className="font-normal">{datosMedico.Apellidos}</span>
             </p>
             <p className="my-5 rounded-full bg-blue-primary px-10 py-1 text-2xl font-bold text-white">
-              Medicina general
+              {datosMedico.Especialidad}
             </p>
           </div>
         </div>

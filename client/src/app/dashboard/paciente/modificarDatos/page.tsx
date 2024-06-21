@@ -73,6 +73,7 @@ interface DatosPaciente {
   Telefono: string;
   CorreoElectronico: string;
   Ocupacion: string;
+  id: string;
 }
 
 // Assuming the original type of `user` is something like this:
@@ -148,7 +149,46 @@ const FormCrearCuenta = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // obtener apellido paterno y materno
     const apellidos = values.apellidos.split(" ");
-    console.log(values);
+
+    // obtener fecha de nacimiento
+    const fechaNacimiento = `${values.anioBirthDate}-${values.mesBirthDate}-${values.diaBirthDate}`;
+
+    const data = {
+      DNI: values.DNI,
+      nombres: values.nombres,
+      apellido_paterno: apellidos[0],
+      apellido_materno: apellidos[1],
+      genero: values.genero,
+      direccion: values.direccionVivienda,
+      telefono: values.nroCelular,
+      ocupacion: values.ocupacion,
+      fechaNacimiento: fechaNacimiento, // anio mes dia
+    };
+
+    try {
+      const res = await updatePaciente(datosPaciente?.IdPaciente, data);
+
+      if (res.status === 200) {
+        //console.log(res.data);
+        toast({
+          title: "Paciente actualizado correctamente",
+          description: `Se actualizaron los datos del paciente`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Se produjo un error al actualizar el paciente",
+          description: "Intente nuevamente.",
+        });
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast({
+        variant: "destructive",
+        title: "Se produjo un error al actualizar el paciente",
+        description: "Intente nuevamente.",
+      });
+    }
   }
 
   return (

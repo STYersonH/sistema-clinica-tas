@@ -6,12 +6,13 @@ import (
 
 	"github.com/asterfy/tis-clinic/initializers"
 	"github.com/asterfy/tis-clinic/models"
+	modelsApi "github.com/asterfy/tis-clinic/modelsAPI"
 	"github.com/gin-gonic/gin"
 )
 
 func GetAllCitas(c *gin.Context) {
 	var citas []models.Cita
-	if result := initializers.DB.Preload("Paciente").Preload("Doctro.Especialidad").Preload("Especialidad").Find(&citas); result.Error != nil {
+	if result := initializers.DB.Preload("Paciente").Preload("Doctor.Especialidad").Preload("Especialidad").Find(&citas); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}
@@ -21,7 +22,7 @@ func GetAllCitas(c *gin.Context) {
 
 func GetCita(c *gin.Context) {
 	var cita models.Cita
-	if result := initializers.DB.Preload("Paciente").Preload("Doctro.Especialidad").Preload("Especialidad").First(&cita, c.Param("id")); result.Error != nil {
+	if result := initializers.DB.Preload("Paciente").Preload("Doctor.Especialidad").Preload("Especialidad").First(&cita, c.Param("id")); result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -53,14 +54,23 @@ func GetCitasPendientesporDniPaciente(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": citas})
 }
 func CreateCita(c *gin.Context) {
-	var cita models.Cita
-	if err := c.ShouldBindJSON(&cita); err != nil {
+	//Extraer los datos del JSON
+	var citaJSON modelsApi.CitaGet
+	if err := c.ShouldBindJSON(&citaJSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	var citaBD models.Cita
+	citaBD.DniPaciente = citaJSON.DniPaciente
+	citaBD.Fecha = citaJSON.Fecha
+	citaBD.EspecialidadId = citaJSON.EspecialidadId
+	citaBD.Motivo = citaJSON.Motivo
+	citaBD.Hora = citaJSON.Fecha + " " + citaJSON.Hora + ":" + citaJSON.Minuto + ":00"
+	citaBD.Estado = "programada"
+
 	var doctoresEspecialidad []models.Doctor
-	if result := initializers.DB.Where("especialidad_id = ?", cita.EspecialidadId).Find(&doctoresEspecialidad); result.Error != nil {
+	if result := initializers.DB.Where("especialidad_id = ?", citaBD.EspecialidadId).Find(&doctoresEspecialidad); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}
@@ -75,14 +85,14 @@ func CreateCita(c *gin.Context) {
 	for _, doctor := range doctoresEspecialidad {
 		numerosLicencia = append(numerosLicencia, doctor.NumeroLicencia)
 	}
-	cita.LicenciaDoctor = numerosLicencia[rand.Intn(len(numerosLicencia))]
+	citaBD.LicenciaDoctor = numerosLicencia[rand.Intn(len(numerosLicencia))]
 
-	if result := initializers.DB.Create(&cita); result.Error != nil {
+	if result := initializers.DB.Create(&citaBD); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": cita, "message": "Cita creada!"})
+	c.JSON(http.StatusCreated, gin.H{"data": citaBD, "message": "Cita creada!"})
 }
 
 func UpdateCita(c *gin.Context) {

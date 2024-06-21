@@ -31,7 +31,6 @@ interface PacienteProps {
 
 const PacientePage = () => {
   const { data: session, status } = useSession();
-  console.log("En paciente page, paciente", session);
 
   const datosPaciente = session?.user;
 
@@ -42,6 +41,8 @@ const PacientePage = () => {
   const [dniPaciente, setDniPaciente] = useState("");
 
   const [citaExiste, setCitaExiste] = useState(false);
+  const [datosCita, setDatosCita] = useState({}); // [datosCita, setDatosCita
+
   const [seguroExiste, setSeguroExiste] = useState(false);
   const [datosSeguro, setDatosSeguro] = useState({});
   const [datosAsegurado, setDatosAsegurado] = useState({});
@@ -49,13 +50,11 @@ const PacientePage = () => {
 
   useEffect(() => {
     const DNIpaciente = datosPaciente?.Dni;
-    console.log("DNI", DNIpaciente);
     setDniPaciente(DNIpaciente);
   }, [datosPaciente]);
 
   useEffect(() => {
     const fetchSeguroPaciente = async () => {
-      console.log("Obteniendo dni pasciente en useEffect:", dniPaciente);
       if (dniPaciente) {
         try {
           // obtener los datos del paciente
@@ -78,12 +77,11 @@ const PacientePage = () => {
   useEffect(() => {
     const obtenerCitaPaciente = async () => {
       if (dniPaciente) {
-        console.log("dniPaciente", dniPaciente);
         try {
           // obtener los datos del paciente
           const res3 = await obtenerInfoCitaPorDNIPaciente(dniPaciente);
-          console.log("res cita existe", res3.data);
-          setDatosAsegurado(res3.data);
+          console.log("res cita 3", res3.data);
+          setDatosCita(res3.data);
 
           if (res3.data.data.length > 0) {
             setCitaExiste(true);

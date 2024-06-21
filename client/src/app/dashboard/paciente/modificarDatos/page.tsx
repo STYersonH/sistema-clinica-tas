@@ -86,8 +86,8 @@ type ExtendedUser = {
 const FormModificarCuentaPaciente = () => {
   // obtener los datos de la session
   const { data: session, status } = useSession();
-
   const usuarioID = (session?.user as ExtendedUser)?.ID;
+
   const [datosPaciente, setDatosPaciente] = useState<DatosPaciente | null>(
     null,
   );

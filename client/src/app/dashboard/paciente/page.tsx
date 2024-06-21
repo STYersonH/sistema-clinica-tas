@@ -56,7 +56,7 @@ const PacientePage = () => {
     const fetchSeguroPaciente = async () => {
       if (dniPaciente) {
         try {
-          // obtener los datos del paciente
+          // obtener los datos del seguro del paciente
           const res1 = await getInfoAsegurado(dniPaciente);
           console.log("res asegurado", res1.data);
           setDatosAsegurado(res1.data);

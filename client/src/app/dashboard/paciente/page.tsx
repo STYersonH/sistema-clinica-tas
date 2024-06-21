@@ -13,7 +13,9 @@ import {
 } from "@/app/apiRoutes/asegurados/aseguradosApi";
 
 import { obtenerInfoCitaPorDNIPaciente } from "@/app/apiRoutes/citas/citasApi";
+import { getInformacionUsuario } from "@/app/apiRoutes/authLogin/authLoginApi";
 import {getCitasCuliminadasPaciente} from "@/app/apiRoutes/citasCulminadas/citasCulminadas.api";
+
 interface DatosPaciente {
   Dni: string | null | undefined;
   Nombres: string | null | undefined;
@@ -29,15 +31,18 @@ interface PacienteProps {
   datosPaciente: DatosPaciente; // Paso 2: Tipar datosPaciente en su origen
 }
 
+type ExtendedUser = {
+  ID?: string | null;
+};
+
 const PacientePage = () => {
   const { data: session, status } = useSession();
-  const datosPaciente = session?.user;
-
-  // obtener fecha de nacimiento
-  let fechaNacimiento = datosPaciente?.FechaNacimiento;
-  fechaNacimiento = fechaNacimiento?.slice(0, 10);
+  const usuarioID = (session?.user as ExtendedUser)?.ID;
 
   const [dniPaciente, setDniPaciente] = useState("");
+  const [datosPaciente, setDatosPaciente] = useState<DatosPaciente | null>(
+    null,
+  );
 
   const [citaExiste, setCitaExiste] = useState(false);
   const [datosCita, setDatosCita] = useState({}); // [datosCita, setDatosCita
@@ -45,7 +50,21 @@ const PacientePage = () => {
   const [seguroExiste, setSeguroExiste] = useState(false);
   const [datosSeguro, setDatosSeguro] = useState({});
   const [datosAsegurado, setDatosAsegurado] = useState({});
+
   const [citaTerminada, setCitaTerminada] = useState(false);
+
+  useEffect(() => {
+    const fetchDatosPaciente = async () => {
+      if (usuarioID) {
+        // obtener los datos del paciente
+        const res = await getInformacionUsuario(usuarioID);
+        console.log(res.data.data);
+        setDatosPaciente(res.data.data);
+      }
+    };
+
+    fetchDatosPaciente();
+  }, [usuarioID]);
 
   useEffect(() => {
     const DNIpaciente = datosPaciente?.Dni;
@@ -139,7 +158,9 @@ const PacientePage = () => {
             </p>
             <p className="text-2xl font-bold text-yellow-600">
               Fecha de nacimiento:{" "}
-              <span className="font-normal">{fechaNacimiento}</span>
+              <span className="font-normal">
+                {datosPaciente?.FechaNacimiento?.slice(0, 10)}
+              </span>
             </p>
           </div>
         </div>

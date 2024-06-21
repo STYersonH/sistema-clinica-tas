@@ -96,16 +96,44 @@ func CreateCita(c *gin.Context) {
 }
 
 func UpdateCita(c *gin.Context) {
+	//Recuperar datos de JSON
+	var citaJSON modelsApi.CitaGet
+	if err := c.ShouldBindJSON(&citaJSON); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	var cita models.Cita
+
 	if result := initializers.DB.First(&cita, c.Param("id")); result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
 
-	// Bind solo los campos que se desean actualizar desde el JSON
-	if err := c.BindJSON(&cita); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	// cita.DniPaciente = citaJSON.DniPaciente
+	cita.Fecha = citaJSON.Fecha
+	cita.EspecialidadId = citaJSON.EspecialidadId
+	cita.Motivo = citaJSON.Motivo
+	cita.Hora = citaJSON.Fecha + " " + citaJSON.Hora + ":" + citaJSON.Minuto + ":00"
+
+	if cita.EspecialidadId != citaJSON.EspecialidadId {
+		var doctoresEspecialidad []models.Doctor
+		if result := initializers.DB.Where("especialidad_id = ?", citaJSON.EspecialidadId).Find(&doctoresEspecialidad); result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
+			return
+		}
+		if len(doctoresEspecialidad) == 0 {
+			if result := initializers.DB.Find(&doctoresEspecialidad); result.Error != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
+				return
+			}
+		}
+
+		var numerosLicencia []string
+		for _, doctor := range doctoresEspecialidad {
+			numerosLicencia = append(numerosLicencia, doctor.NumeroLicencia)
+		}
+		cita.LicenciaDoctor = numerosLicencia[rand.Intn(len(numerosLicencia))]
 	}
 
 	// Guardar el registro actualizado
@@ -114,7 +142,7 @@ func UpdateCita(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": cita})
+	c.JSON(http.StatusOK, gin.H{"data": cita, "message": "Cita actualizada!"})
 }
 
 func DeleteCita(c *gin.Context) {
@@ -123,8 +151,9 @@ func DeleteCita(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
+	cita.Estado = "cancelada"
 
-	if result := initializers.DB.Delete(&cita); result.Error != nil {
+	if result := initializers.DB.Model(&cita).Omit("created_at").Updates(&cita); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}

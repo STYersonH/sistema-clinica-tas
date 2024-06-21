@@ -186,7 +186,7 @@ const TraramientoPage = () => {
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Escribir el motivo de por que necesita una consulta"
+                      placeholder="Escribir el diagnósito de la cita médica"
                       id="message-2"
                       className="border-blue-primary"
                     />

@@ -13,7 +13,7 @@ import {
 } from "@/app/apiRoutes/asegurados/aseguradosApi";
 
 import { obtenerInfoCitaPorDNIPaciente } from "@/app/apiRoutes/citas/citasApi";
-
+import {getCitasCuliminadasPaciente} from "@/app/apiRoutes/citasCulminadas/citasCulminadas.api";
 interface DatosPaciente {
   Dni: string | null | undefined;
   Nombres: string | null | undefined;
@@ -73,6 +73,13 @@ const PacientePage = () => {
     fetchSeguroPaciente();
   }, [dniPaciente]);
 
+  const fetchCitasCulminadas = async () => {
+    const response = await getCitasCuliminadasPaciente(dniPaciente);
+    console.log(response.data.data);
+    if (response.data.data.length > 0) {
+      setCitaTerminada(true);
+    }
+  }
   useEffect(() => {
     const obtenerCitaPaciente = async () => {
       if (dniPaciente) {
@@ -90,7 +97,7 @@ const PacientePage = () => {
         }
       }
     };
-
+    fetchCitasCulminadas();
     obtenerCitaPaciente();
   }, [dniPaciente]);
 

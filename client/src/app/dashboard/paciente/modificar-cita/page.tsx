@@ -28,7 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -59,9 +59,15 @@ type ExtendedUser = {
   Dni?: string | null;
 };
 
+interface Especialidad {
+  Nombre: string;
+  // include other properties as needed
+}
+
 const FormCrearCuenta = () => {
   const router = useRouter();
-  const [especialidades, setEspecialidades] = useState([]);
+  const [especialidades, setEspecialidades] = useState<Especialidad[]>([]);
+  const [datosCita, setDatosCita] = useState({});
 
   // obtener el id del paciente desde los datos de sesion
   const { data: session, status } = useSession();
@@ -101,9 +107,70 @@ const FormCrearCuenta = () => {
       setEspecialidades(res.data.data);
       console.log(res.data.data);
     };
-
     ObtenerEspecialidades();
   }, []);
+
+  useEffect(() => {
+    const ObtenerDatosCita = async () => {
+      const datosCita = {
+        especialidad: "1",
+        motivoConsulta: "Consulta de rutina",
+        fechaCita: "2024-10-01",
+        horaCita: "10",
+        minutoCita: "00",
+      };
+
+      console.log("datos cita", especialidades);
+
+      const index = parseInt(datosCita.especialidad) - 1;
+      const especialidad =
+        index >= 0 && index < especialidades.length
+          ? especialidades[index].Nombre
+          : "Default Name";
+
+      const date = new Date(datosCita.fechaCita + "T00:00:00");
+
+      // 2. Ajustar la fecha a la zona horaria de Perú (GMT-0500)
+      const peruTimeZone = "America/Lima";
+      const options = {
+        timeZone: peruTimeZone,
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZoneName: "short",
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const formattedDate = formatter.format(date);
+
+      const nuevosDatos = {
+        ...datosCita,
+        especialidad,
+        fechaCita: formattedDate,
+      };
+      console.log(nuevosDatos);
+      setDatosCita(nuevosDatos);
+    };
+
+    ObtenerDatosCita();
+  }, [especialidades]);
+
+  useEffect(() => {
+    if (datosCita) {
+      form.reset({
+        especialidad: datosCita.especialidad,
+        motivoConsulta: datosCita.motivoConsulta,
+        fechaCita: datosCita.fechaCita,
+        horaCita: datosCita.horaCita,
+        minutoCita: datosCita.minutoCita,
+      });
+    }
+  }, [datosCita]);
 
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-yellow-primary">
@@ -117,7 +184,7 @@ const FormCrearCuenta = () => {
           <FaAngleLeft className="transition-transform duration-200 group-hover:scale-125" />
         </div>
         <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-primary">
-          Reserva de cita medica
+          Modificar cita medica
         </h2>
       </div>
 
@@ -140,9 +207,11 @@ const FormCrearCuenta = () => {
                         field.onChange(value);
                       }}
                       value={field.value}
+                      // no modificar
+                      disabled
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar especialidad" />
+                        <SelectValue placeholder={datosCita.especialidad} />
                       </SelectTrigger>
                       <SelectContent>
                         {especialidades.map((especialidad) => (
@@ -247,7 +316,7 @@ const FormCrearCuenta = () => {
                           >
                             <FormControl>
                               <SelectTrigger className="w-full">
-                                <SelectValue placeholder="hora" />
+                                <SelectValue placeholder={datosCita.horaCita} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -283,7 +352,9 @@ const FormCrearCuenta = () => {
                           >
                             <FormControl>
                               <SelectTrigger className="w-full">
-                                <SelectValue placeholder="minuto" />
+                                <SelectValue
+                                  placeholder={datosCita.minutoCita}
+                                />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -301,12 +372,15 @@ const FormCrearCuenta = () => {
             </div>
           </div>
 
-          <div className="w-full pt-5 text-center">
+          <div className="flex w-full justify-center gap-5 pt-5">
             <Button
               type="submit"
               className="rounded-3xl bg-green-500 px-16 py-7 font-bold hover:bg-green-600"
             >
-              Agendar cita
+              Modificar cita
+            </Button>
+            <Button className="rounded-3xl bg-red-500 px-16 py-7 font-bold hover:bg-red-600">
+              Cancelar cita
             </Button>
           </div>
         </form>

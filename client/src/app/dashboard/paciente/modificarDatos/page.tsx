@@ -529,9 +529,10 @@ const FormCrearCuenta = () => {
               Modificar cuenta
             </Button>
 
-            <Button className="rounded-3xl bg-red-500 px-16 py-7 font-bold hover:bg-red-600">
+            {/*<Button className="rounded-3xl bg-red-500 px-16 py-7 font-bold hover:bg-red-600">
               Eliminar cuenta
-            </Button>
+            </Button>*/}
+
             <Button className="rounded-3xl bg-stone-500 px-16 py-7 font-bold hover:bg-stone-600">
               Cambiar contraseña
             </Button>

@@ -1,26 +1,55 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Button from "@/components/Button";
 import { cn } from "@/lib/utils";
 
+import {
+  getInfoAsegurado,
+  getInfoSeguro,
+} from "@/app/apiRoutes/asegurados/aseguradosApi";
+
 const PacientePage = () => {
   const { data: session, status } = useSession();
   console.log("En paciente page, paciente", session);
 
   const datosPaciente = session?.user;
+  const DNIpaciente = datosPaciente.Dni;
+  console.log("DNI", DNIpaciente);
 
   // obtener fecha de nacimiento
   let fechaNacimiento = datosPaciente.FechaNacimiento;
   fechaNacimiento = fechaNacimiento.slice(0, 10);
 
+  const [citaExiste, setCitaExiste] = useState(false);
+  const [seguroExiste, setSeguroExiste] = useState(false);
+  const [datosSeguro, setDatosSeguro] = useState({});
+  const [datosAsegurado, setDatosAsegurado] = useState({});
+  const [citaTerminada, setCitaTerminada] = useState(false);
 
-  const [citaExiste, setCitaExiste] = useState(true);
-  const [seguroExiste, setSeguroExiste] = useState(true);
-  const [citaTerminada, setCitaTerminada] = useState(true);
+  useEffect(() => {
+    const fetchSeguroPaciente = async () => {
+      if (DNIpaciente) {
+        try {
+          // obtener los datos del paciente
+          const res1 = await getInfoAsegurado(DNIpaciente);
+          console.log("res asegurado", res1.data);
+          setDatosAsegurado(res1.data);
+          const res2 = await getInfoSeguro(DNIpaciente);
+          console.log("res seguro", res2.data);
+          setDatosSeguro(res2.data);
+          setSeguroExiste(true);
+        } catch (error) {
+          console.log("Error al obtener los datos del asegurado", error);
+        }
+      }
+    };
+
+    fetchSeguroPaciente();
+  }, []);
 
   const router = useRouter();
   return (
@@ -76,8 +105,10 @@ const PacientePage = () => {
             <div className="mb-10 flex w-[500px] flex-col items-center justify-center rounded-2xl border border-gris p-10 text-yellow-primary">
               <h2 className="text-2xl font-bold">USTED ESTA ASEGURADO</h2>
               <div className="mt-3 flex gap-x-5">
-                <p className="font-bold">Seguro estandar</p>
-                <p className="">2 anios</p>
+                <p className="font-bold">Seguro {datosSeguro.tipo_seguro}</p>
+                <p className="">
+                  Vence el {datosAsegurado.FechaVencimiento.slice(0, 10)}
+                </p>
               </div>
             </div>
           )}
@@ -92,7 +123,7 @@ const PacientePage = () => {
           )}
           {citaExiste && !citaTerminada && (
             <Button
-              href="/dashboard/paciente/citas"
+              href="/dashboard/paciente/modificar-cita"
               color="yellow"
               className="w-[500px] rounded-xl text-2xl"
             >

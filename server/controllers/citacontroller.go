@@ -53,6 +53,18 @@ func GetCitasPendientesporDniPaciente(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": citas})
 }
+
+// Obtener citas en estado ='completada' dado el dni de un paciente
+func GetCitasCulminadasporDniPaciente(c *gin.Context) {
+	dniPaciente := c.Param("dni_paciente")
+	var citas []models.Cita
+	if result := initializers.DB.Preload("Paciente").Preload("Doctor.Especialidad").Preload("Especialidad").Where("dni_paciente = ? AND estado = ?", dniPaciente, "completada").Find(&citas); result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": citas})
+}
 func CreateCita(c *gin.Context) {
 	//Extraer los datos del JSON
 	var citaJSON modelsApi.CitaGet

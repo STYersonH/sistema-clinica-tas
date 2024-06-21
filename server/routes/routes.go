@@ -27,6 +27,10 @@ func SetupRoutes(router *gin.Engine) {
 		citas.PUT("/:id/", controllers.UpdateCita)
 		citas.DELETE("/:id/", controllers.DeleteCita)
 	}
+	citascompletadas := router.Group("/citascompletadas")
+	{
+		citascompletadas.GET("/culminadopaciente/:dni_paciente/", controllers.GetCitasCulminadasporDniPaciente)
+	}
 	citaspendientes := router.Group("/citaspendientes")
 	{
 		citaspendientes.GET("/pendientedoctor/:licencia_doctor/", controllers.GetCitasPendientesporLicenciaDoctor)

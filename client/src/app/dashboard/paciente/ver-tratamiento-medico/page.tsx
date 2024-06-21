@@ -12,21 +12,24 @@ const TratamientoPage = () => {
   const [DNIusuario, setDNIusuario] = useState<any>("");
 
   const { data: session, status } = useSession();
+  
   const datosUsuarioSession = session?.user;
 
-  const fetchHistorialClinico = async () => {
-    const response = await getHistorialUsuario("53415764");
-    console.log(response.data.data);
+  const fetchHistorialClinico = async (IDuser:string) => {
+    const response = await getHistorialUsuario(IDuser);
+    // console.log(response.data.data);
     setHistorialClinico(response.data.data[0]);
   };
 
-  useEffect(() => {
-    fetchHistorialClinico();
-  }, []);
+  // useEffect(() => {
+  //   // console.log(DNIusuario)
+    
+  // }, []);
 
   useEffect(() => {
     const DNI = datosUsuarioSession?.Dni;
     setDNIusuario(DNI);
+    fetchHistorialClinico(DNIusuario);
   }, [datosUsuarioSession]);
 
   const router = useRouter();

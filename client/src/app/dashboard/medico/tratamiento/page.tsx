@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
-
+import { createHistorialClinico } from "@/app/apiRoutes/historialClinic/historialClinic.api";
+import { getMedicamentos } from "@/app/apiRoutes/medicamentos/medicamentos.api";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -41,40 +42,34 @@ const formSchema = z.object({
 
 interface Tratamiento {
   tipo: string;
-  nombre?: string;
+  nombreMedicamento?: string;
   dosis?: string;
   frecuencia?: string;
   duracion?: string;
   descripcion?: string;
+  receta?: any[];
 }
 
 const TraramientoPage = () => {
   const [agregarTratamiento, setAgregarTratamiento] = useState(false);
   const [tipoTratamiento, setTipoTratamiento] = useState("");
-  const [tratamientos, setTratamientos] = useState<Tratamiento[]>([
-    {
-      tipo: "medicamento",
-      nombre: "Paracetamol",
-      dosis: "800ml",
-      frecuencia: "Cada 8 horas",
-      duracion: "3 días",
-    },
-    {
-      tipo: "terapia",
-      descripcion: "Terapia de relajación y respiración por 30 minutos al día",
-    },
-    {
-      tipo: "cirugia",
-      descripcion:
-        "Cirugía de extracción de muelas del juicio (agendar la operacion)",
-    },
-  ]);
+  const [tratamientos, setTratamientos] = useState<Tratamiento[]>([])
+  const [medicamentos, setMedicamentos] = useState([])
+
+  const fetchMedicamentos = async () => {
+    const response = await getMedicamentos();
+    setMedicamentos(response.data.data);
+  }
+
+  useEffect(() => {
+    fetchMedicamentos();
+  }, [])
 
   const searchParams = useSearchParams();
   const citaID = searchParams.get("citaID");
   const dniPaciente = searchParams.get("dniPaciente");
   const liscenciaMedico = searchParams.get("liscenciaMedico");
-  console.log(citaID, dniPaciente, liscenciaMedico);
+  // console.log(citaID, dniPaciente, liscenciaMedico);
 
   const router = useRouter();
 
@@ -92,11 +87,31 @@ const TraramientoPage = () => {
     },
   });
 
-  // 2. Define a submit handler.
+  function getFechaActual() {
+    const fechaActual = new Date()
+    const año = fechaActual.getFullYear();
+    const mes = fechaActual.getMonth() + 1; // Sumamos 1 porque getMonth devuelve de 0 a 11
+    const dia = fechaActual.getDate();
+
+    const fechaFormateada = `${año}-${mes < 10 ? '0' + mes : mes}-${dia < 10 ? '0' + dia : dia}`;
+    return fechaFormateada 
+  }
+  
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    const sendDataHisotrialClinic = async (data:any) => {
+      const response = await createHistorialClinico(data);
+      console.log(response.data);
+    } 
+    //Construir data
+    const dataNewHistorialClinic = {
+      Idcita: parseInt(citaID),
+      Diagnostico: values.diagnostico,
+      DniPaciente: dniPaciente,
+      LicenciaMedico: liscenciaMedico,
+      FechaDiagnostico: getFechaActual(),
+      Tratamientos: tratamientos
+    }
+    sendDataHisotrialClinic(dataNewHistorialClinic);
   }
 
   const handleAgregarTratamiento = () => {
@@ -108,10 +123,15 @@ const TraramientoPage = () => {
           ...tratamientos,
           {
             tipo: tipoTratamiento,
-            nombre: values.medicamento,
-            dosis: values.dosis,
-            frecuencia: values.frecuencia,
-            duracion: values.duracion,
+            descripcion: "",
+            receta: [
+              {
+                nombreMedicamento: values.medicamento,
+                dosis: values.dosis,
+                frecuencia: values.frecuencia,
+                duracion: values.duracion,
+              }
+            ],
           },
         ]);
         setTipoTratamiento("");
@@ -126,6 +146,7 @@ const TraramientoPage = () => {
           {
             tipo: tipoTratamiento,
             descripcion: values.descripcion,
+            receta: []
           },
         ]);
         setTipoTratamiento("");
@@ -201,7 +222,7 @@ const TraramientoPage = () => {
                         <p className="text-2xl font-bold">
                           Medicamento:{"  "}
                           <span className="font-normal">
-                            {tratamiento.nombre}
+                            {tratamiento.nombreMedicamento}
                           </span>
                         </p>
                         <div className="flex justify-around gap-10">
@@ -309,7 +330,12 @@ const TraramientoPage = () => {
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        <SelectItem value="Paracetamol">
+                                        {medicamentos.map((medicamento:any, index:number) => (
+                                          <SelectItem key={index} value={medicamento.Nombre}>
+                                            {medicamento.Nombre}
+                                          </SelectItem>
+                                        ))}
+                                        {/* <SelectItem value="Paracetamol">
                                           Paracetamol
                                         </SelectItem>
                                         <SelectItem value="Ibuprofeno">
@@ -317,7 +343,7 @@ const TraramientoPage = () => {
                                         </SelectItem>
                                         <SelectItem value="Amoxicilina">
                                           Amoxicilina
-                                        </SelectItem>
+                                        </SelectItem> */}
                                       </SelectContent>
                                     </Select>
                                     <FormMessage />

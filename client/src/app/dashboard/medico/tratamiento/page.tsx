@@ -30,15 +30,13 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const formSchema = z.object({
-  diagnostico: z.string().min(1, "Por favor escriba un diagnostico"),
-  tipoTratamiento: z
-    .string()
-    .min(1, "Por favor seleccione un tipo de tratamiento"),
-  descripcion: z.string().min(1, "Por favor escriba una descripcion"),
-  medicamento: z.string().min(1, "Por favor seleccione un medicamento"),
-  dosis: z.string().min(1, "Por favor escriba la dosis"),
-  frecuencia: z.string().min(1, "Por favor escriba la frecuencia"),
-  duracion: z.string().min(1, "Por favor escriba la duracion"),
+  diagnostico: z.string().min(1, "Por favor escriba el diagnóstico"),
+  tipoTratamiento: z.string(),
+  descripcion: z.string(),
+  medicamento: z.string(),
+  dosis: z.string(),
+  frecuencia: z.string(),
+  duracion: z.string(),
 });
 
 interface Tratamiento {

@@ -83,7 +83,7 @@ type ExtendedUser = {
   ID?: string | null;
 };
 
-const FormCrearCuenta = () => {
+const FormModificarCuentaPaciente = () => {
   // obtener los datos de la session
   const { data: session, status } = useSession();
 
@@ -278,7 +278,7 @@ const FormCrearCuenta = () => {
                           <FormControl>
                             <SelectTrigger className="w-full">
                               <SelectValue
-                                placeholder={datosPaciente?.FechaNacimiento.slice(
+                                placeholder={datosPaciente?.FechaNacimiento?.slice(
                                   0,
                                   4,
                                 )}
@@ -317,7 +317,7 @@ const FormCrearCuenta = () => {
                           <FormControl>
                             <SelectTrigger className="w-full">
                               <SelectValue
-                                placeholder={datosPaciente?.FechaNacimiento.slice(
+                                placeholder={datosPaciente?.FechaNacimiento?.slice(
                                   5,
                                   7,
                                 )}
@@ -360,7 +360,7 @@ const FormCrearCuenta = () => {
                           <FormControl>
                             <SelectTrigger className="w-full">
                               <SelectValue
-                                placeholder={datosPaciente?.FechaNacimiento.slice(
+                                placeholder={datosPaciente?.FechaNacimiento?.slice(
                                   8,
                                   10,
                                 )}
@@ -545,4 +545,4 @@ const FormCrearCuenta = () => {
   );
 };
 
-export default FormCrearCuenta;
+export default FormModificarCuentaPaciente;

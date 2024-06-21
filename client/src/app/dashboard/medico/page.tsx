@@ -7,48 +7,20 @@ import Image from "next/image";
 import Button from "@/components/Button";
 import { cn } from "@/lib/utils";
 import { tree } from "next/dist/build/templates/app-page";
-import { getCitasProgramadasDoctor } from "@/app/apiRoutes/citas/citas.api";
+import { getCitasProgramadasDoctor } from "@/app/apiRoutes/citasPendientes/citasPendientes.api";
 
 const MedicoPage = () => {
-  const [citasPendientes2, setCitasPendientes] = useState([])
+  const [citasPendientes, setCitasPendientes] = useState([])
   const [citasExisten, setCitasExisten] = useState(true);
 
   const fetchCitasPendientes = async () => {
     const response = await getCitasProgramadasDoctor("5520859570");
-    if (response.status === 200) {
-      setCitasPendientes(response.data.data);
-      console.log(response.data.data);
-      setCitasExisten(true);
-    } else {
-      setCitasExisten(false);
-    }
+    setCitasPendientes(response.data.data);
   }
 
   useEffect(() => {
     fetchCitasPendientes();
   }, []);
-  const citasPendientes = [
-    {
-      id: 1,
-      DNI: "77777777",
-      nombres: "Mat Rony",
-      apellidos: "Omeda Salcedo",
-      fecha: "20/01/2024",
-      hora: "10:00",
-      especialidad: "Medicina general",
-      motivo: "Dolor de cabeza",
-    },
-    {
-      id: 2,
-      DNI: "77777777",
-      nombres: "Mat Rony",
-      apellidos: "Omeda Salcedo",
-      fecha: "20/01/2024",
-      hora: "10:00",
-      especialidad: "Medicina general",
-      motivo: "Dolor de cabeza",
-    },
-  ];
 
   const router = useRouter();
   return (
@@ -83,37 +55,37 @@ const MedicoPage = () => {
 
         {/* Citas pendientes */}
         <div className="relative flex h-[696px] w-[550px] flex-col items-center gap-y-10 rounded-2xl border border-gris p-10">
-          {citasExisten ? (
+          {citasPendientes.length != 0 ? (
             <div className="w-full">
               <h1 className="mb-5 w-full rounded-xl bg-blue-primary py-2 text-center text-2xl font-bold text-white">
                 CITAS PENDIENTES
               </h1>
               <div className="flex flex-col gap-y-4">
-                {citasPendientes.map((cita) => (
+                {citasPendientes.map((cita:any) => (
                   <div
-                    key={cita.id}
+                    key={cita.ID}
                     className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-gris px-10 py-3 text-blue-primary transition-all hover:bg-stone-300"
                     onClick={() => router.push("/dashboard/medico/tratamiento")}
                   >
                     <p className="text-lg font-bold text-blue-primary">
                       Paciente:{" "}
                       <span className="font-normal">
-                        {cita.nombres} {cita.apellidos}
+                        {cita.Paciente.Nombres} {cita.Paciente.Apellido_paterno} {cita.Paciente.Apellido_materno}
                       </span>
                     </p>
                     <div className="w-full rounded-xl bg-blue-primary px-6 py-2 text-center text-white">
-                      {cita.motivo}
+                      {cita.Motivo}
                     </div>
                     <p className="font-bold">
                       Especialidad:{" "}
-                      <span className="font-normal">{cita.especialidad}</span>
+                      <span className="font-normal">{cita.Especialidad.Nombre}</span>
                     </p>
                     <div className="flex gap-5">
                       <p className="font-bold">
-                        Fecha: <span className="font-normal">{cita.fecha}</span>{" "}
+                        Fecha: <span className="font-normal">{(cita.Fecha).substring(0,10)}</span>{" "}
                       </p>
                       <p className="font-bold">
-                        Hora: <span className="font-normal">{cita.hora}</span>
+                        Hora: <span className="font-normal">{(cita.Hora).substring(11,16)}</span>
                       </p>
                     </div>
                   </div>

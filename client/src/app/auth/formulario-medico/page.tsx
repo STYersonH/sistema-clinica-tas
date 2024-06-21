@@ -1,6 +1,8 @@
 "use client";
 
-import React from "react";
+import { getEspecialidades } from "@/app/apiRoutes/especialidades/especialidadesApi";
+
+import React, { useEffect, useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
 import { z } from "zod";
@@ -62,12 +64,10 @@ const formSchema = z.object({
 });
 
 const FormMedico = () => {
-  const searchParams = useSearchParams(); // usar params del URL
-  let id = searchParams.get("id");
-  console.log("id: ", id);
-
   const router = useRouter();
   const { toast } = useToast();
+
+  const [especialidades, setEspecialidades] = useState([]);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -88,7 +88,16 @@ const FormMedico = () => {
     },
   });
 
-  //TODO: Obtener las especialidades para mostrar en el formulario
+  useEffect(() => {
+    const ObtenerEspecialidades = async () => {
+      // obtener los tipos de seguro
+      const res = await getEspecialidades();
+      setEspecialidades(res.data.data);
+      console.log(res.data.data);
+    };
+
+    ObtenerEspecialidades();
+  }, []);
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -100,7 +109,7 @@ const FormMedico = () => {
 
     const data = {
       DNI: values.DNI,
-      numero_liscencia: values.numeroLiscencia,
+      numero_licencia: values.numeroLiscencia,
       nombres: values.nombres,
       apellido_paterno: apellidos[0],
       apellido_materno: apellidos[1],
@@ -109,8 +118,10 @@ const FormMedico = () => {
       direccion: values.direccionVivienda,
       telefono: values.nroCelular,
       fechaNacimiento: fechaNacimiento, // anio mes dia
-      especialidad_id: values.especialidad,
+      especialidadId: parseInt(values.especialidad),
     };
+
+    console.log(data);
 
     const res = await postMedico(data);
 
@@ -122,6 +133,7 @@ const FormMedico = () => {
         title: "Paciente creado correctamente",
         description: `Su usuario y contraseña son "${values.numeroLiscencia}"`, //TODO en cuanto se pueda actualizar al medico, actualizar este mensaje
       });
+      router.push("/dashboard/medico");
     } else {
       toast({
         variant: "destructive",
@@ -252,20 +264,18 @@ const FormMedico = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Enero">Enero</SelectItem>
-                            <SelectItem value="Febrero">Febrero</SelectItem>
-                            <SelectItem value="Marzo">Marzo</SelectItem>
-                            <SelectItem value="Abril">Abril</SelectItem>
-                            <SelectItem value="Mayo">Mayo</SelectItem>
-                            <SelectItem value="Junio">Junio</SelectItem>
-                            <SelectItem value="Julio">Julio</SelectItem>
-                            <SelectItem value="Agosto">Agosto</SelectItem>
-                            <SelectItem value="Septiembre">
-                              Septiembre
-                            </SelectItem>
-                            <SelectItem value="Octubre">Octubre</SelectItem>
-                            <SelectItem value="Noviembre">Noviembre</SelectItem>
-                            <SelectItem value="Diciembre">Diciembre</SelectItem>
+                            <SelectItem value="01">Enero</SelectItem>
+                            <SelectItem value="02">Febrero</SelectItem>
+                            <SelectItem value="03">Marzo</SelectItem>
+                            <SelectItem value="04">Abril</SelectItem>
+                            <SelectItem value="05">Mayo</SelectItem>
+                            <SelectItem value="06">Junio</SelectItem>
+                            <SelectItem value="07">Julio</SelectItem>
+                            <SelectItem value="08">Agosto</SelectItem>
+                            <SelectItem value="09">Septiembre</SelectItem>
+                            <SelectItem value="10">Octubre</SelectItem>
+                            <SelectItem value="11">Noviembre</SelectItem>
+                            <SelectItem value="12">Diciembre</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -463,13 +473,14 @@ const FormMedico = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="General">General</SelectItem>
-                          <SelectItem value="Traumatologia">
-                            Traumatologia
-                          </SelectItem>
-                          <SelectItem value="Dermatologia">
-                            Dermatologia
-                          </SelectItem>
+                          {especialidades.map((especialidad) => (
+                            <SelectItem
+                              key={especialidad.ID}
+                              value={especialidad.ID.toString()}
+                            >
+                              {especialidad.Nombre}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />

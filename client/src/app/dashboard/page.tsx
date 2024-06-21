@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface ExtendedSessionUser {
   ID: number;
@@ -23,7 +24,11 @@ const DashboardPage = () => {
     }
   });
 
-  return <div>dashboardPage</div>;
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <Image src="/loading.png" alt="loading" width={50} height={50} />
+    </div>
+  );
 };
 
 export default DashboardPage;

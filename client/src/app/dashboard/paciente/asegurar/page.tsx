@@ -1,8 +1,9 @@
 "use client";
 
 import { asegurar } from "@/app/apiRoutes/asegurados/aseguradosApi";
+import { getTiposSeguro } from "@/app/apiRoutes/seguros/segurosApi";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
 import { z } from "zod";
@@ -34,6 +35,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 import {
   Popover,
@@ -61,13 +63,15 @@ const AsegurarPage = () => {
   // obtener los datos de la session
   const { data: session, status } = useSession();
   const IdPaciente = (session?.user as ExtendedUser)?.IdPaciente;
+  const [tiposSeguro, setTiposSeguro] = useState([]);
 
   const [procedido, setProcedido] = useState(false);
-  const [tipoSeguro, setTipoSeguro] = useState(""); // 1. Add state for tipoSeguro
+  const [tipoSeguro, setTipoSeguro] = useState({});
   const [cantAniosSeguro, setCantAniosSeguro] = useState(""); // 1. Add state for cantAniosSeguro
 
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { toast } = useToast();
 
   // Obtener el valor del parametro tipo
   const tipo = searchParams.get("tipo");
@@ -90,30 +94,45 @@ const AsegurarPage = () => {
 
     const datosSeguro = {
       idPaciente: IdPaciente,
-      tipo: tipoSeguro,
-      cantAnios: cantAniosSeguro,
+      tipo: tipoSeguro.TipoSeguro,
+      cantAnios: parseInt(cantAniosSeguro, 10) || 0,
     };
 
     try {
       const res = await asegurar(datosSeguro);
       console.log(res);
+      toast({
+        title: "Se ha asegurado de manera exitosa",
+        description: `Se ha asegurado por ${cantAniosSeguro} año(s) con el seguro ${tipoSeguro.TipoSeguro}`,
+      });
+      router.push("/dashboard/paciente/");
     } catch (error) {
       console.log("Error al asegurar");
     }
   }
 
+  useEffect(() => {
+    const ObtenerTiposSeguro = async () => {
+      // obtener los tipos de seguro
+      const res = await getTiposSeguro();
+      setTiposSeguro(res.data.data);
+    };
+
+    ObtenerTiposSeguro();
+  }, []);
+
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-yellow-500">
+    <div className="flex h-screen flex-col items-center justify-center bg-yellow-primary">
       <div
         className="flex gap-6"
         onClick={() => {
           router.push("/dashboard/paciente/");
         }}
       >
-        <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
+        <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-primary">
           <FaAngleLeft className="transition-transform duration-200 group-hover:scale-125" />
         </div>
-        <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
+        <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-primary">
           Contratar seguro de salud
         </h2>
       </div>
@@ -136,7 +155,7 @@ const AsegurarPage = () => {
                       <Select
                         onValueChange={(value) => {
                           field.onChange(value);
-                          setTipoSeguro(value); // 2. Update state on value change
+                          setTipoSeguro(tiposSeguro[value - 1]); // 2. Update state on value change
                         }}
                         defaultValue={field.value}
                       >
@@ -146,9 +165,14 @@ const AsegurarPage = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="basico">Basico</SelectItem>
-                          <SelectItem value="estandar">Estandar</SelectItem>
-                          <SelectItem value="premium">Premium</SelectItem>
+                          {tiposSeguro.map((seguro) => (
+                            <SelectItem
+                              key={seguro.ID}
+                              value={seguro?.ID.toString()}
+                            >
+                              {seguro?.TipoSeguro}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -222,9 +246,9 @@ const AsegurarPage = () => {
                 <div className="flex w-full justify-around">
                   <p className="text-xl">
                     Seguro de salud{" "}
-                    <span className="font-bold">{tipoSeguro}</span>
+                    <span className="font-bold">{tipoSeguro.TipoSeguro}</span>
                   </p>
-                  <p className="text-xl font-bold">S/.200</p>
+                  <p className="text-xl font-bold">S/.{tipoSeguro.Precio}</p>
                 </div>
                 {/* crear una linea separadora */}
                 <div className="mx-4 my-4 h-[2px] w-[70%] bg-gray-400 text-gray-500" />
@@ -234,7 +258,7 @@ const AsegurarPage = () => {
                     <span className="font-bold">{cantAniosSeguro} año(s)</span>
                   </p>
                   <p className="text-xl font-bold">
-                    S/.{200 * Number(cantAniosSeguro)}
+                    S/.{tipoSeguro.Precio * Number(cantAniosSeguro)}
                   </p>
                 </div>
               </div>

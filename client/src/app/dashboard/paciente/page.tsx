@@ -24,11 +24,11 @@ const PacientePage = () => {
   let fechaNacimiento = datosPaciente.FechaNacimiento;
   fechaNacimiento = fechaNacimiento.slice(0, 10);
 
-  const [citaExiste, setCitaExiste] = useState(true);
+  const [citaExiste, setCitaExiste] = useState(false);
   const [seguroExiste, setSeguroExiste] = useState(false);
   const [datosSeguro, setDatosSeguro] = useState({});
   const [datosAsegurado, setDatosAsegurado] = useState({});
-  const [citaTerminada, setCitaTerminada] = useState(true);
+  const [citaTerminada, setCitaTerminada] = useState(false);
 
   useEffect(() => {
     const fetchSeguroPaciente = async () => {
@@ -36,10 +36,11 @@ const PacientePage = () => {
         try {
           // obtener los datos del paciente
           const res1 = await getInfoAsegurado(DNIpaciente);
-          console.log(res1.data);
-          setDatosAsegurado(res1.data.data);
+          console.log("res asegurado", res1.data);
+          setDatosAsegurado(res1.data);
           const res2 = await getInfoSeguro(DNIpaciente);
-          setDatosSeguro(res2.data.data);
+          console.log("res seguro", res2.data);
+          setDatosSeguro(res2.data);
           setSeguroExiste(true);
         } catch (error) {
           console.log("Error al obtener los datos del asegurado", error);
@@ -104,8 +105,10 @@ const PacientePage = () => {
             <div className="mb-10 flex w-[500px] flex-col items-center justify-center rounded-2xl border border-gris p-10 text-yellow-primary">
               <h2 className="text-2xl font-bold">USTED ESTA ASEGURADO</h2>
               <div className="mt-3 flex gap-x-5">
-                <p className="font-bold">Seguro estandar</p>
-                <p className="">2 anios</p>
+                <p className="font-bold">Seguro {datosSeguro.tipo_seguro}</p>
+                <p className="">
+                  Vence el {datosAsegurado.FechaVencimiento.slice(0, 10)}
+                </p>
               </div>
             </div>
           )}
@@ -120,7 +123,7 @@ const PacientePage = () => {
           )}
           {citaExiste && !citaTerminada && (
             <Button
-              href="/dashboard/paciente/citas"
+              href="/dashboard/paciente/modificar-cita"
               color="yellow"
               className="w-[500px] rounded-xl text-2xl"
             >

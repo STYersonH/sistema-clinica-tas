@@ -1,6 +1,10 @@
 "use client";
 
 import { getEspecialidades } from "@/app/apiRoutes/especialidades/especialidadesApi";
+import {
+  obtenerInfoCitaPorDNIPaciente,
+  putCita,
+} from "@/app/apiRoutes/citas/citasApi";
 import React, { useEffect, useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
@@ -42,15 +46,16 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import { useSession } from "next-auth/react";
 
 const formSchema = z.object({
-  especialidad: z.string().min(1, { message: "elegir Especialidad" }),
+  especialidad: z.string(),
   motivoConsulta: z
     .string()
     .min(1, { message: "escribir motivo de la consulta" }),
   // fecha obligatoria
-  fechaCita: z.date({ message: "elegir fecha" }),
+  fechaCita: z.date().optional(),
   horaCita: z.string().min(1, { message: "elegir hora" }),
   minutoCita: z.string().min(1, { message: "elegir minutos" }),
 });
@@ -66,12 +71,15 @@ interface Especialidad {
 
 const FormCrearCuenta = () => {
   const router = useRouter();
+  const { toast } = useToast();
   const [especialidades, setEspecialidades] = useState<Especialidad[]>([]);
   const [datosCita, setDatosCita] = useState({});
+  const [DNI, setDNI] = useState<string | null | undefined>("");
 
   // obtener el id del paciente desde los datos de sesion
   const { data: session, status } = useSession();
-  const DNI = (session?.user as ExtendedUser)?.Dni;
+  const datosPaciente = session?.user;
+  //const DNI = (session?.user as ExtendedUser)?.Dni;
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -85,42 +93,70 @@ const FormCrearCuenta = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     let date = new Date(values.fechaCita);
     const fechaConFormato = date.toISOString().split("T")[0];
+    console.log("llenando datos con el estado: ", datosCita);
 
     const data = {
-      DNI: DNI,
-      especialidad: values.especialidad,
+      DNIpaciente: DNI,
+      especialidadId: parseInt(datosCita.idEspecialidad),
       motivo: values.motivoConsulta,
-      fecha: fechaConFormato,
+      fecha: fechaConFormato ? fechaConFormato : datosCita.Original,
       hora: values.horaCita,
       minuto: values.minutoCita,
     };
-    console.log(data);
+    console.log("datos para enviar", data);
+
+    try {
+      const res = await putCita(datosCita.ID, data);
+      console.log(res.status);
+      toast({
+        title: "Se actualizo la cita correctamente",
+        description: `Tiene una cita el ${fechaConFormato} a las ${values.horaCita}:${values.minutoCita}`,
+      });
+      router.push("/dashboard/paciente/");
+    } catch (err: any) {
+      console.log("Hubo un error al actualizar la cita", err);
+      toast({
+        variant: "destructive",
+        title: "Se produjo un error al intentar actualizar la cita",
+        description: "Intente nuevamente.",
+      });
+    }
   }
+
+  useEffect(() => {
+    const DNIpaciente = datosPaciente?.Dni;
+    console.log("DNI", DNIpaciente);
+    setDNI(DNIpaciente);
+  }, [datosPaciente]);
 
   useEffect(() => {
     const ObtenerEspecialidades = async () => {
       // obtener los tipos de seguro
       const res = await getEspecialidades();
       setEspecialidades(res.data.data);
-      console.log(res.data.data);
     };
     ObtenerEspecialidades();
   }, []);
 
   useEffect(() => {
     const ObtenerDatosCita = async () => {
+      const resDatosCita = await obtenerInfoCitaPorDNIPaciente(DNI);
+      const datosDeCita = resDatosCita.data.data[0];
+      console.log("res datos cita", resDatosCita.data.data[0]);
+
       const datosCita = {
-        especialidad: "1",
-        motivoConsulta: "Consulta de rutina",
-        fechaCita: "2024-10-01",
-        horaCita: "10",
-        minutoCita: "00",
+        ID: datosDeCita?.ID,
+        especialidad: datosDeCita?.EspecialidadId,
+        motivoConsulta: datosDeCita?.Motivo,
+        fechaCita: datosDeCita?.Fecha?.slice(0, 10),
+        horaCita: datosDeCita?.Hora?.slice(11, 13),
+        minutoCita: datosDeCita?.Hora?.slice(14, 16),
       };
 
-      console.log("datos cita", especialidades);
+      console.log(datosCita);
 
       const index = parseInt(datosCita.especialidad) - 1;
       const especialidad =
@@ -146,19 +182,20 @@ const FormCrearCuenta = () => {
       };
 
       const formatter = new Intl.DateTimeFormat("en-US", options);
-      const formattedDate = formatter.format(date);
+      const formattedDate = formatter?.format(date);
 
       const nuevosDatos = {
         ...datosCita,
+        idEspecialidad: datosCita.especialidad,
+        fechaOriginal: datosCita.fechaCita,
         especialidad,
         fechaCita: formattedDate,
       };
-      console.log(nuevosDatos);
       setDatosCita(nuevosDatos);
     };
 
     ObtenerDatosCita();
-  }, [especialidades]);
+  }, [especialidades, DNI]);
 
   useEffect(() => {
     if (datosCita) {
@@ -211,7 +248,7 @@ const FormCrearCuenta = () => {
                       disabled
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={datosCita.especialidad} />
+                        <SelectValue placeholder={datosCita?.especialidad} />
                       </SelectTrigger>
                       <SelectContent>
                         {especialidades.map((especialidad) => (

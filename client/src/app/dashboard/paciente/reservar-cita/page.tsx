@@ -1,6 +1,8 @@
 "use client";
 
 import { getEspecialidades } from "@/app/apiRoutes/especialidades/especialidadesApi";
+import { postCita } from "@/app/apiRoutes/citas/citasApi";
+
 import React, { useEffect, useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
 
@@ -42,6 +44,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import { useSession } from "next-auth/react";
 
 const formSchema = z.object({
@@ -62,6 +65,7 @@ type ExtendedUser = {
 const FormCrearCuenta = () => {
   const router = useRouter();
   const [especialidades, setEspecialidades] = useState([]);
+  const { toast } = useToast();
 
   // obtener el id del paciente desde los datos de sesion
   const { data: session, status } = useSession();
@@ -79,19 +83,36 @@ const FormCrearCuenta = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     let date = new Date(values.fechaCita);
     const fechaConFormato = date.toISOString().split("T")[0];
 
     const data = {
-      DNI: DNI,
-      especialidad: values.especialidad,
+      DNIpaciente: DNI,
+      especialidadId: parseInt(values.especialidad),
       motivo: values.motivoConsulta,
       fecha: fechaConFormato,
       hora: values.horaCita,
       minuto: values.minutoCita,
     };
     console.log(data);
+
+    try {
+      const res = await postCita(data);
+      console.log(res.status);
+      toast({
+        title: "Se reservo la cita correctamente",
+        description: `Tiene una cita el ${fechaConFormato} a las ${values.horaCita}:${values.minutoCita}`,
+      });
+      router.push("/dashboard/paciente/");
+    } catch (err: any) {
+      console.log("Hubo un error al crear la cita", err);
+      toast({
+        variant: "destructive",
+        title: "Se produjo un error al intentar reservar la cita",
+        description: "Intente nuevamente.",
+      });
+    }
   }
 
   useEffect(() => {

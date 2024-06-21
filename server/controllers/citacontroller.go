@@ -46,7 +46,7 @@ func GetCitasPendientesporLicenciaDoctor(c *gin.Context) {
 func GetCitasPendientesporDniPaciente(c *gin.Context) {
 	dniPaciente := c.Param("dni_paciente")
 	var citas []models.Cita
-	if result := initializers.DB.Where("dni_paciente = ? AND estado = ?", dniPaciente, "programada").Find(&citas); result.Error != nil {
+	if result := initializers.DB.Preload("Paciente").Preload("Doctor.Especialidad").Preload("Especialidad").Where("dni_paciente = ? AND estado = ?", dniPaciente, "programada").Find(&citas); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
 		return
 	}

@@ -163,6 +163,7 @@ const FormCrearCuenta = () => {
       telefono: values.nroCelular,
       ocupacion: values.ocupacion,
       fechaNacimiento: fechaNacimiento, // anio mes dia
+      email: values.email,
     };
 
     try {
@@ -174,6 +175,7 @@ const FormCrearCuenta = () => {
           title: "Paciente actualizado correctamente",
           description: `Se actualizaron los datos del paciente`,
         });
+        router.push("/dashboard/paciente");
       } else {
         toast({
           variant: "destructive",
@@ -192,17 +194,17 @@ const FormCrearCuenta = () => {
   }
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-yellow-500">
+    <div className="flex h-screen flex-col items-center justify-center bg-yellow-primary">
       <div
         className="flex gap-6"
         onClick={() => {
           router.push("/dashboard/paciente");
         }}
       >
-        <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
+        <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-primary">
           <FaAngleLeft className="transition-transform duration-200 group-hover:scale-125" />
         </div>
-        <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-500">
+        <h2 className="mb-10 rounded-full bg-white px-10 py-5 text-4xl font-bold text-yellow-primary">
           Modificacion de cuenta para paciente
         </h2>
       </div>

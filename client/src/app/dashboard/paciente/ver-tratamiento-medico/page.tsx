@@ -3,36 +3,30 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { getHistorialUsuario } from "../../../apiRoutes/historialClinic/historialClinic.api";
 
 const TratamientoPage = () => {
-  const [historialClinico, setHistorialClinico] = useState<any>([]);
-  const [DNIusuario, setDNIusuario] = useState<any>("");
+  const searchParams = useSearchParams();
+  const dniPaciente = searchParams.get("dniPaciente");
 
-  const { data: session, status } = useSession();
-  
-  const datosUsuarioSession = session?.user;
-
-  const fetchHistorialClinico = async (IDuser:string) => {
-    const response = await getHistorialUsuario(IDuser);
-    // console.log(response.data.data);
-    setHistorialClinico(response.data.data[0]);
-  };
-
-  // useEffect(() => {
-  //   // console.log(DNIusuario)
-    
-  // }, []);
-
-  useEffect(() => {
-    const DNI = datosUsuarioSession?.Dni;
-    setDNIusuario(DNI);
-    fetchHistorialClinico(DNIusuario);
-  }, [datosUsuarioSession]);
+  const [DNIusuario, setDNIusuario] = useState<any>(dniPaciente);
 
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const [historialClinico, setHistorialClinico] = useState<any>([]);
+  const datosUsuarioSession = session?.user;
+
+  useEffect(() => {
+    const fetchHistorialClinico = async (IDuser: string) => {
+      const response = await getHistorialUsuario(IDuser);
+      // console.log(response.data.data);
+      setHistorialClinico(response.data.data[0]);
+    };
+
+    fetchHistorialClinico(DNIusuario);
+  }, [DNIusuario]);
 
   return (
     <main className="flex w-screen justify-center">

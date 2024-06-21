@@ -211,7 +211,7 @@ const PacientePage = () => {
 
           {citaTerminada && (
             <Button
-              href="/dashboard/paciente/ver-tratamiento-medico"
+              href={`/dashboard/paciente/ver-tratamiento-medico?dniPaciente=${dniPaciente}`}
               className="w-[500px] rounded-xl bg-stone-300 text-2xl text-yellow-primary hover:bg-stone-400 hover:text-white"
             >
               VER TRATAMIENTO MEDICO

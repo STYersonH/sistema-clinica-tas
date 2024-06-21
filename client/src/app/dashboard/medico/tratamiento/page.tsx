@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,17 +54,19 @@ interface Tratamiento {
 const TraramientoPage = () => {
   const [agregarTratamiento, setAgregarTratamiento] = useState(false);
   const [tipoTratamiento, setTipoTratamiento] = useState("");
-  const [tratamientos, setTratamientos] = useState<Tratamiento[]>([])
-  const [medicamentos, setMedicamentos] = useState([])
+  const [tratamientos, setTratamientos] = useState<Tratamiento[]>([]);
+  const [medicamentos, setMedicamentos] = useState([]);
+
+  const { toast } = useToast();
 
   const fetchMedicamentos = async () => {
     const response = await getMedicamentos();
     setMedicamentos(response.data.data);
-  }
+  };
 
   useEffect(() => {
     fetchMedicamentos();
-  }, [])
+  }, []);
 
   const searchParams = useSearchParams();
   const citaID = searchParams.get("citaID");
@@ -88,30 +91,36 @@ const TraramientoPage = () => {
   });
 
   function getFechaActual() {
-    const fechaActual = new Date()
+    const fechaActual = new Date();
     const año = fechaActual.getFullYear();
     const mes = fechaActual.getMonth() + 1; // Sumamos 1 porque getMonth devuelve de 0 a 11
     const dia = fechaActual.getDate();
 
-    const fechaFormateada = `${año}-${mes < 10 ? '0' + mes : mes}-${dia < 10 ? '0' + dia : dia}`;
-    return fechaFormateada 
+    const fechaFormateada = `${año}-${mes < 10 ? "0" + mes : mes}-${dia < 10 ? "0" + dia : dia}`;
+    return fechaFormateada;
   }
-  
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const sendDataHisotrialClinic = async (data:any) => {
-      const response = await createHistorialClinico(data);
-      console.log(response.data);
-    } 
-    //Construir data
-    const dataNewHistorialClinic = {
-      Idcita: parseInt(citaID),
-      Diagnostico: values.diagnostico,
-      DniPaciente: dniPaciente,
-      LicenciaMedico: liscenciaMedico,
-      FechaDiagnostico: getFechaActual(),
-      Tratamientos: tratamientos
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      //Construir data
+      const dataNewHistorialClinic = {
+        Idcita: parseInt(citaID),
+        Diagnostico: values.diagnostico,
+        DniPaciente: dniPaciente,
+        LicenciaMedico: liscenciaMedico,
+        FechaDiagnostico: getFechaActual(),
+        Tratamientos: tratamientos,
+      };
+      const response = await createHistorialClinico(dataNewHistorialClinic);
+      toast({
+        title: "Se ha formulado el diagnositco y tratamiento exitosamente",
+        description: `Ha concluido con la cita del paciente ${dniPaciente}`,
+      });
+
+      router.push("/dashboard/medico");
+    } catch (err) {
+      console.log(err);
     }
-    sendDataHisotrialClinic(dataNewHistorialClinic);
   }
 
   const handleAgregarTratamiento = () => {
@@ -130,7 +139,7 @@ const TraramientoPage = () => {
                 dosis: values.dosis,
                 frecuencia: values.frecuencia,
                 duracion: values.duracion,
-              }
+              },
             ],
           },
         ]);
@@ -146,7 +155,7 @@ const TraramientoPage = () => {
           {
             tipo: tipoTratamiento,
             descripcion: values.descripcion,
-            receta: []
+            receta: [],
           },
         ]);
         setTipoTratamiento("");
@@ -156,7 +165,7 @@ const TraramientoPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-blue-primary py-10 pt-24">
+    <div className="flex min-h-screen flex-col items-center bg-blue-primary py-10 pt-32">
       <div
         className="flex gap-6"
         onClick={() => {
@@ -330,11 +339,16 @@ const TraramientoPage = () => {
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        {medicamentos.map((medicamento:any, index:number) => (
-                                          <SelectItem key={index} value={medicamento.Nombre}>
-                                            {medicamento.Nombre}
-                                          </SelectItem>
-                                        ))}
+                                        {medicamentos.map(
+                                          (medicamento: any, index: number) => (
+                                            <SelectItem
+                                              key={index}
+                                              value={medicamento.Nombre}
+                                            >
+                                              {medicamento.Nombre}
+                                            </SelectItem>
+                                          ),
+                                        )}
                                         {/* <SelectItem value="Paracetamol">
                                           Paracetamol
                                         </SelectItem>

@@ -40,6 +40,7 @@ func GetAllHistoriales(c *gin.Context) {
 		var medico modelsApi.Medico
 		medico.Telefono = historial.Doctor.Telefono
 		medico.NombresApellidos = historial.Doctor.Nombres + " " + historial.Doctor.Apellido_paterno + " " + historial.Doctor.Apellido_materno
+		medico.Email = historial.Doctor.Email
 		var Especialidad models.Especialidad
 		if result := initializers.DB.First(&Especialidad, "id = ?", historial.Doctor.EspecialidadId); result.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Specialty not found!"})

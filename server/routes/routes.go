@@ -108,7 +108,14 @@ func SetupRoutes(router *gin.Engine) {
 		tratamientos.PUT("/:id/", controllers.UpdateTratamiento)
 		tratamientos.DELETE("/:id/", controllers.DeleteTratamiento)
 	}
-
+	infoPaciente := router.Group("/infoPaciente")
+	{
+		infoPaciente.GET("/", controllers.GetInfoPaciente) // DNI
+	}
+	citaHistorial := router.Group("/citaHistorial")
+	{
+		citaHistorial.GET("/", controllers.GetCitaAndHistorial) // IdCita
+	}
 	auth := router.Group("/auth")
 	{
 		auth.POST("/", controllers.ValidateLogin)

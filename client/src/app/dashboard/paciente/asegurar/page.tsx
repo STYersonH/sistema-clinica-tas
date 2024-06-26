@@ -67,7 +67,7 @@ const AsegurarPage = () => {
 
   const [procedido, setProcedido] = useState(false);
   const [tipoSeguro, setTipoSeguro] = useState({});
-  const [cantAniosSeguro, setCantAniosSeguro] = useState(""); // 1. Add state for cantAniosSeguro
+  const [cantAniosSeguro, setCantAniosSeguro] = useState("");
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -88,8 +88,6 @@ const AsegurarPage = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     console.log(values);
 
     const datosSeguro = {

@@ -7,7 +7,7 @@ export default function Home() {
     <div className="flex justify-center">
       <div className="w-[1900px]">
         {/* Header */}
-        <div className="flex justify-end">
+        <div className="flex justify-end pr-10">
           <Button href={"/auth/login"}>LOGIN</Button>
         </div>
 

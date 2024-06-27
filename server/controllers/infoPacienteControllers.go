@@ -10,24 +10,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// func getInfoPacienteByName(c *gin.Context) {
+// 	namePatient := c.Query("name")
+
+// }
+
 func GetInfoPaciente(c *gin.Context) {
 	var infoPaciente modelsApi.InfoPatient
 	NroDniPaciente := c.Query("DNI")
+	namePatient := c.Query("name")
 
 	//Llenar datos de paciente
 	var pacienteDB models.Paciente
 	if result := initializers.DB.First(&pacienteDB, "dni = ?", NroDniPaciente); result.Error != nil {
-		c.JSON(404, gin.H{"error": "Paciente no encontrado"})
-		return
-	} else {
-		infoPaciente.Nombres = pacienteDB.Nombres
-		infoPaciente.Apellidos = pacienteDB.Apellido_paterno + " " + pacienteDB.Apellido_materno
-		infoPaciente.FechaNacimiento = pacienteDB.FechaNacimiento
-		infoPaciente.DNI = pacienteDB.Dni
-		infoPaciente.NroCelular = pacienteDB.Telefono
-		infoPaciente.Genero = pacienteDB.Genero
-		infoPaciente.DireccionVivienda = pacienteDB.Direccion
+		if result := initializers.DB.First(&pacienteDB, "nombres = ?", namePatient); result.Error != nil {
+			c.JSON(404, gin.H{"error": "Paciente no encontrado"})
+			return
+		} else {
+			NroDniPaciente = pacienteDB.Dni
+		}
 	}
+
+	infoPaciente.Nombres = pacienteDB.Nombres
+	infoPaciente.Apellidos = pacienteDB.Apellido_paterno + " " + pacienteDB.Apellido_materno
+	infoPaciente.FechaNacimiento = pacienteDB.FechaNacimiento
+	infoPaciente.DNI = pacienteDB.Dni
+	infoPaciente.NroCelular = pacienteDB.Telefono
+	infoPaciente.Genero = pacienteDB.Genero
+	infoPaciente.DireccionVivienda = pacienteDB.Direccion
 
 	//Obtener tipo de seguro
 	var pacienteAsegurado models.Asegurado

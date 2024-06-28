@@ -216,8 +216,8 @@ const HistorialClinico = () => {
                   </div>
                   <div>
                     <p className="text-gray-500">Ocupacion</p>
-                    {actualPaciente.Ocupacion ? (
-                      <p className="text-xl">Trabajador social</p>
+                    {actualPaciente.Ocupacion != null ? (
+                      <p className="text-xl">{actualPaciente.Ocupacion}</p>
                     ) : (
                       <p className="text-xl text-red-800">
                         Aun no se actualizo esta informacion
@@ -228,7 +228,7 @@ const HistorialClinico = () => {
               </div>
 
               {/*INFORMACION DE SEGURO*/}
-              {actualPaciente.TieneSeguro !== null ? (
+              {actualPaciente.TipoSeguro !== null ? (
                 <div className="flex justify-center rounded-2xl border border-gris py-3 text-2xl font-bold text-blue-primary">
                   Tiene seguro {actualPaciente.TipoSeguro}
                 </div>

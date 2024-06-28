@@ -158,7 +158,7 @@ const FormModificarCuentaMedico = () => {
       direccion: values.direccionVivienda,
       telefono: values.nroCelular,
       fechaNacimiento: fechaNacimiento, // anio mes dia
-      especialidad_id: values.especialidad,
+      especialidadId: parseInt(values.especialidad),
     };
 
     console.log("datos antes de enviar", data);
@@ -174,6 +174,7 @@ const FormModificarCuentaMedico = () => {
           description: `Ha actualizado su informacion correctamente"`, //TODO en cuanto se pueda actualizar al medico, actualizar este mensaje
         });
         router.push("/dashboard/medico");
+        router.refresh();
       } else {
         toast({
           variant: "destructive",
@@ -513,6 +514,7 @@ const FormModificarCuentaMedico = () => {
                           placeholder="numero de liscencia"
                           {...field}
                           className=""
+                          disabled
                         />
                       </FormControl>
                       <FormMessage />

@@ -6,7 +6,10 @@ type CitaHistorial struct {
 }
 
 type CitaDatos struct {
-	Dia    string
-	Hora   string
-	Motivo string
+	NombrePaciente    string
+	ApellidosPaciente string
+	DNIPaciente       string
+	Dia               string
+	Hora              string
+	Motivo            string
 }

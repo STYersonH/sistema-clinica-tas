@@ -72,7 +72,7 @@ func GetCitaAndHistorial(c *gin.Context) {
 	var citaHistorial modelsApi.CitaHistorial
 
 	var citaDB models.Cita
-	if result := initializers.DB.Preload("Doctor").First(&citaDB, "id = ?", IdCitaParam); result.Error != nil {
+	if result := initializers.DB.Preload("Paciente").Preload("Doctor").First(&citaDB, "id = ?", IdCitaParam); result.Error != nil {
 		c.JSON(404, gin.H{"error": "La cita no existe"})
 		return
 	}
@@ -81,6 +81,11 @@ func GetCitaAndHistorial(c *gin.Context) {
 		c.JSON(404, gin.H{"error": "La cita no tiene historial clínico"})
 		return
 	}
+
+	//Llenar datos de paciente
+	citaHistorial.CitaDatos.NombrePaciente = citaDB.Paciente.Nombres
+	citaHistorial.CitaDatos.ApellidosPaciente = citaDB.Paciente.Apellido_paterno + " " + citaDB.Paciente.Apellido_materno
+	citaHistorial.CitaDatos.DNIPaciente = citaDB.Paciente.Dni
 
 	// Llenar datos de la cita
 	citaHistorial.CitaDatos.Dia = citaDB.Fecha[0:10]

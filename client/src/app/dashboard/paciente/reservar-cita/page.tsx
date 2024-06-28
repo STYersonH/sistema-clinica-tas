@@ -67,7 +67,7 @@ const FormCrearCuenta = () => {
   const [especialidades, setEspecialidades] = useState([]);
   const { toast } = useToast();
 
-  // obtener el id del paciente desde los datos de sesion
+  // obtener el dni del paciente desde los datos de sesion
   const { data: session, status } = useSession();
   const DNI = (session?.user as ExtendedUser)?.Dni;
 

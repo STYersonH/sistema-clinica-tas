@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import React from "react";
 import { AiOutlineLogout } from "react-icons/ai";
 import { signOut, useSession } from "next-auth/react";
@@ -22,6 +22,8 @@ type ColorVariantKey = "yellow" | "blue";
 
 const Navbar = ({ color }: NavbarProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+
   const { data: session } = useSession();
   const tipoUser =
     (session?.user as ExtendedSessionUser)?.Tipo === "paciente"
@@ -63,15 +65,17 @@ const Navbar = ({ color }: NavbarProps) => {
         </div>
         {/*Elementos del Navbar */}
         <div className="flex items-center gap-10">
-          <Button
-            className={cn(
-              "m-0 bg-white px-3 py-1 transition-all hover:bg-stone-400 hover:text-white",
-              textColorVariants[color as ColorVariantKey],
-            )}
-            href={`/dashboard/${tipoUser}/modificarDatos?id=${ID}`}
-          >
-            Modificar datos personales
-          </Button>
+          {pathname === `/dashboard/${tipoUser}` && (
+            <Button
+              className={cn(
+                "m-0 bg-white px-3 py-1 transition-all hover:bg-stone-400 hover:text-white",
+                textColorVariants[color as ColorVariantKey],
+              )}
+              href={`/dashboard/${tipoUser}/modificarDatos?id=${ID}`}
+            >
+              Modificar datos personales
+            </Button>
+          )}
           <button onClick={() => signOut()}>
             <AiOutlineLogout
               className="text-white transition-all hover:scale-125"

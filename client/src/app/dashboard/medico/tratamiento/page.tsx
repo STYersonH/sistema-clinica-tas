@@ -118,6 +118,7 @@ const TraramientoPage = () => {
       });
 
       router.push("/dashboard/medico");
+      router.refresh();
     } catch (err) {
       console.log(err);
     }
@@ -170,6 +171,7 @@ const TraramientoPage = () => {
         className="flex gap-6"
         onClick={() => {
           router.push("/dashboard/medico");
+          router.refresh();
         }}
       >
         <div className="group mb-10 flex cursor-pointer items-center rounded-full bg-white px-10 py-5 text-4xl font-bold text-blue-primary">
@@ -475,10 +477,20 @@ const TraramientoPage = () => {
               )}
             </div>
 
-            <div className="flex w-full justify-center">
+            <div className="flex w-full justify-center gap-10">
+              <Button
+                className="rounded-3xl bg-gris px-16 py-7 font-bold hover:bg-stone-700"
+                onClick={() => {
+                  router.push(
+                    `/dashboard/medico/historialClinico?DNI=${dniPaciente}`,
+                  );
+                }}
+              >
+                Ver historial de paciente
+              </Button>
               <Button
                 type="submit"
-                className="mx-auto rounded-3xl bg-green-500 px-16 py-7 font-bold hover:bg-green-600"
+                className="rounded-3xl bg-green-500 px-16 py-7 font-bold hover:bg-green-600"
               >
                 Proceder
               </Button>

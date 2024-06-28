@@ -62,91 +62,100 @@ const MedicoPage = () => {
           />
           <div className="flex w-[450px] flex-col items-center rounded-2xl border border-gris p-8">
             <p className="text-2xl font-bold text-blue-primary">
-              DNI: <span className="font-normal">{datosMedico.Dni}</span>
+              DNI: <span className="font-normal">{datosMedico?.Dni}</span>
             </p>
             <p className="text-2xl font-bold text-blue-primary">
               Liscencia:{" "}
-              <span className="font-normal">{datosMedico.NroLiscencia}</span>
+              <span className="font-normal">{datosMedico?.NroLiscencia}</span>
             </p>
             <p className="text-2xl font-bold text-blue-primary">
               Nombres:{" "}
-              <span className="font-normal">{datosMedico.Nombres}</span>
+              <span className="font-normal">{datosMedico?.Nombres}</span>
             </p>
             <p className="text-2xl font-bold text-blue-primary">
               Apellidos:{" "}
-              <span className="font-normal">{datosMedico.Apellidos}</span>
+              <span className="font-normal">{datosMedico?.Apellidos}</span>
             </p>
             <p className="my-5 rounded-full bg-blue-primary px-10 py-1 text-2xl font-bold text-white">
-              {datosMedico.Especialidad}
+              {datosMedico?.Especialidad}
             </p>
           </div>
         </div>
 
-        {/* Citas pendientes */}
-        <div className="relative flex h-[696px] w-[550px] flex-col items-center gap-y-10 rounded-2xl border border-gris p-10">
-          {citasPendientes.length != 0 ? (
-            <div className="w-full">
-              <h1 className="mb-5 w-full rounded-xl bg-blue-primary py-2 text-center text-2xl font-bold text-white">
-                CITAS PENDIENTES
-              </h1>
-              <div className="flex flex-col gap-y-4">
-                {citasPendientes.map((cita: any) => (
-                  <div
-                    key={cita.ID}
-                    className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-gris px-10 py-3 text-blue-primary transition-all hover:bg-stone-300"
-                    onClick={() =>
-                      router.push(
-                        `/dashboard/medico/tratamiento?citaID=${cita.ID}&dniPaciente=${cita.DniPaciente}&liscenciaMedico=${cita.LicenciaDoctor}`,
-                      )
-                    }
-                  >
-                    <p className="text-lg font-bold text-blue-primary">
-                      Paciente:{" "}
-                      <span className="font-normal">
-                        {cita.Paciente.Nombres} {cita.Paciente.Apellido_paterno}{" "}
-                        {cita.Paciente.Apellido_materno}
-                      </span>
-                    </p>
-                    <div className="w-full rounded-xl bg-blue-primary px-6 py-2 text-center text-white">
-                      {cita.Motivo}
-                    </div>
-                    <p className="font-bold">
-                      Especialidad:{" "}
-                      <span className="font-normal">
-                        {cita.Especialidad.Nombre}
-                      </span>
-                    </p>
-                    <div className="flex gap-5">
-                      <p className="font-bold">
-                        Fecha:{" "}
+        <div className="flex h-[696px] w-[550px] flex-col gap-10">
+          <Button
+            className="mb m-0 rounded-2xl bg-blue-primary hover:bg-blue-dark"
+            href="/dashboard/medico/historialClinico"
+          >
+            HISTORIAL CLINICO DE PACIENTES
+          </Button>
+          {/* Citas pendientes */}
+          <div className="relative flex h-full w-full flex-col items-center gap-y-10 rounded-2xl border border-gris p-10">
+            {citasPendientes.length != 0 ? (
+              <div className="w-full">
+                <h1 className="mb-5 w-full rounded-xl border-2 border-blue-primary py-2 text-center text-2xl font-bold text-blue-primary">
+                  CITAS PENDIENTES
+                </h1>
+                <div className="flex flex-col gap-y-4">
+                  {citasPendientes.map((cita: any) => (
+                    <div
+                      key={cita.ID}
+                      className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-gris px-10 py-3 text-blue-primary transition-all hover:bg-stone-300"
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/medico/tratamiento?citaID=${cita.ID}&dniPaciente=${cita.DniPaciente}&liscenciaMedico=${cita.LicenciaDoctor}`,
+                        )
+                      }
+                    >
+                      <p className="text-lg font-bold text-blue-primary">
+                        Paciente:{" "}
                         <span className="font-normal">
-                          {cita.Fecha.substring(0, 10)}
-                        </span>{" "}
-                      </p>
-                      <p className="font-bold">
-                        Hora:{" "}
-                        <span className="font-normal">
-                          {cita.Hora.substring(11, 16)}
+                          {cita.Paciente.Nombres}{" "}
+                          {cita.Paciente.Apellido_paterno}{" "}
+                          {cita.Paciente.Apellido_materno}
                         </span>
                       </p>
+                      <div className="w-full rounded-xl bg-blue-primary px-6 py-2 text-center text-white">
+                        {cita.Motivo}
+                      </div>
+                      <p className="font-bold">
+                        Especialidad:{" "}
+                        <span className="font-normal">
+                          {cita.Especialidad.Nombre}
+                        </span>
+                      </p>
+                      <div className="flex gap-5">
+                        <p className="font-bold">
+                          Fecha:{" "}
+                          <span className="font-normal">
+                            {cita.Fecha.substring(0, 10)}
+                          </span>{" "}
+                        </p>
+                        <p className="font-bold">
+                          Hora:{" "}
+                          <span className="font-normal">
+                            {cita.Hora.substring(11, 16)}
+                          </span>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex h-[80%] flex-col items-center justify-center text-blue-primary">
-              <Image
-                src="/EmptyState.svg"
-                alt="empty state"
-                width={300}
-                height={300}
-              />
-              <p className="absolute bottom-[290px] text-xl">
-                No hay citas pendientes
-              </p>
-            </div>
-          )}
+            ) : (
+              <div className="flex h-[80%] flex-col items-center justify-center text-blue-primary">
+                <Image
+                  src="/EmptyState.svg"
+                  alt="empty state"
+                  width={300}
+                  height={300}
+                />
+                <p className="absolute bottom-[270px] text-xl">
+                  No hay citas pendientes
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </main>

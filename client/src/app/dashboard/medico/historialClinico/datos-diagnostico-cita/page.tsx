@@ -59,17 +59,26 @@ const DatosDiagnosticoCita = () => {
               {datosDiagnosticoCita?.CitaDatos?.Motivo}
             </span>
           </p>
-          <div className="flex gap-x-10 text-blue-primary">
-            <p className="text-lg font-bold">
-              Fecha de la cita:{" "}
+          <div className="flex flex-col text-blue-primary">
+            <div className="flex gap-x-10">
+              <p className="text-lg font-bold">
+                Fecha de la cita:{" "}
+                <span className="font-normal">
+                  {datosDiagnosticoCita?.CitaDatos?.Dia}
+                </span>
+              </p>
+              <p className="text-lg font-bold">
+                Hora de la cita:{" "}
+                <span className="font-normal">
+                  {datosDiagnosticoCita?.CitaDatos?.Hora}
+                </span>
+              </p>
+            </div>
+            <p className="text-center text-lg font-bold">
+              Paciente:{" "}
               <span className="font-normal">
-                {datosDiagnosticoCita?.CitaDatos?.Dia}
-              </span>
-            </p>
-            <p className="text-lg font-bold">
-              Hora de la cita:{" "}
-              <span className="font-normal">
-                {datosDiagnosticoCita?.CitaDatos?.Hora}
+                {datosDiagnosticoCita?.CitaDatos?.NombrePaciente}{" "}
+                {datosDiagnosticoCita?.CitaDatos?.ApellidosPaciente}
               </span>
             </p>
           </div>

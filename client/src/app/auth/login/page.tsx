@@ -27,11 +27,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 const formSchema = z.object({
   username: z.string(),
-  password: z.string().min(8).max(50),
+  password: z.string(),
 });
 
 const LoginPage = () => {
   const router = useRouter();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,22 +47,30 @@ const LoginPage = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
 
-    const res = await signIn("credentials", {
-      username: values.username,
-      password: values.password,
-      redirect: false, // no redireccionar a una pagina de respuesta
-    });
+    try {
+      const res = await signIn("credentials", {
+        username: values.username,
+        password: values.password,
+        redirect: false, // no redireccionar a una pagina de respuesta
+      });
 
-    if (!res) {
-      // Handle the case where res is undefined
-      setError("An unexpected error occurred.");
-    } else if (!res.ok) {
-      // Handle the case where res is defined but not ok
-      setError(res.error);
-    } else {
-      // Handle the success case
-      console.log(res);
-      router.push("/dashboard");
+      if (!res) {
+        // Handle the case where res is undefined
+        setError("An unexpected error occurred.");
+      } else if (!res.ok) {
+        // Handle the case where res is defined but not ok
+        setError(res.error);
+      } else {
+        // Handle the success case
+        console.log(res);
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "El usuario o la contraseña son incorrectos",
+        description: "Intente nuevamente.",
+      });
     }
   }
 

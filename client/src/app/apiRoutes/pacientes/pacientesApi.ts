@@ -11,3 +11,5 @@ export const updatePaciente = (id: string, data: any) =>
   documentApi.put(`pacientes/${id}/`, data);
 export const deletePaciente = (id: string) =>
   documentApi.delete(`pacientes/${id}/`);
+export const infoPacientePorDNI = (dni: string) =>
+  documentApi.get(`infoPaciente/?DNI=${dni}`);

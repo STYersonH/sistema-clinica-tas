@@ -109,7 +109,7 @@ const FormMedico = () => {
 
     const data = {
       DNI: values.DNI,
-      numero_licencia: values.numeroLiscencia,
+      NumeroLicencia: values.numeroLiscencia,
       nombres: values.nombres,
       apellido_paterno: apellidos[0],
       apellido_materno: apellidos[1],

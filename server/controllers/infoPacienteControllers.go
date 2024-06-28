@@ -38,6 +38,7 @@ func GetInfoPaciente(c *gin.Context) {
 	infoPaciente.NroCelular = pacienteDB.Telefono
 	infoPaciente.Genero = pacienteDB.Genero
 	infoPaciente.DireccionVivienda = pacienteDB.Direccion
+	infoPaciente.Ocupacion = &pacienteDB.Ocupacion
 
 	//Obtener tipo de seguro
 	var pacienteAsegurado models.Asegurado

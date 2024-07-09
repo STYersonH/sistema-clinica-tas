@@ -34,27 +34,26 @@ func CrearEspecialidades(especialidades []string) {
 func CrearPacientes(n int) {
 	for i := 0; i < n; i++ {
 		var paciente = models.Paciente{}
-		paciente.Dni = faker.CCNumber()[:8]
-		paciente.Genero = randomGenero()
-		if paciente.Genero == "masculino" {
-			paciente.Nombres = faker.FirstNameMale()
+		*paciente.Dni = faker.CCNumber()[:8]
+		*paciente.Genero = randomGenero()
+		if *paciente.Genero == "masculino" {
+			*paciente.Nombres = faker.FirstNameMale()
 		} else {
-			paciente.Nombres = faker.FirstNameFemale()
+			*paciente.Nombres = faker.FirstNameFemale()
 		}
-		paciente.Apellido_paterno = faker.LastName()
-		paciente.Apellido_materno = faker.LastName()
-		paciente.Direccion = ""
-		paciente.Email = faker.Email()
-		paciente.Telefono = faker.Phonenumber()[:9]
-		paciente.Ocupacion = "Ingeniero"
-		paciente.FechaNacimiento = faker.Date()
+		*paciente.Apellido_paterno = faker.LastName()
+		*paciente.Apellido_materno = faker.LastName()
+		*paciente.Email = faker.Email()
+		*paciente.Telefono = faker.Phonenumber()[:9]
+		*paciente.Ocupacion = "Ingeniero"
+		*paciente.FechaNacimiento = faker.Date()
 
 		//Guardar paciente
 		if result := initializers.DB.Create(&paciente); result.Error != nil {
 			fmt.Println("Error al guardar paciente")
 		} else {
 			//Crear cuenta para usuario
-			CrearUsuario("paciente", paciente.Dni)
+			CrearUsuario("paciente", *paciente.Dni)
 		}
 
 	}

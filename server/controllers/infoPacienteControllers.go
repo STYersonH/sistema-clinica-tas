@@ -27,18 +27,18 @@ func GetInfoPaciente(c *gin.Context) {
 			c.JSON(404, gin.H{"error": "Paciente no encontrado"})
 			return
 		} else {
-			NroDniPaciente = pacienteDB.Dni
+			NroDniPaciente = *pacienteDB.Dni
 		}
 	}
 
-	infoPaciente.Nombres = pacienteDB.Nombres
-	infoPaciente.Apellidos = pacienteDB.Apellido_paterno + " " + pacienteDB.Apellido_materno
-	infoPaciente.FechaNacimiento = pacienteDB.FechaNacimiento
-	infoPaciente.DNI = pacienteDB.Dni
-	infoPaciente.NroCelular = pacienteDB.Telefono
-	infoPaciente.Genero = pacienteDB.Genero
-	infoPaciente.DireccionVivienda = pacienteDB.Direccion
-	infoPaciente.Ocupacion = &pacienteDB.Ocupacion
+	infoPaciente.Nombres = *pacienteDB.Nombres
+	infoPaciente.Apellidos = *pacienteDB.Apellido_paterno + " " + *pacienteDB.Apellido_materno
+	infoPaciente.FechaNacimiento = *pacienteDB.FechaNacimiento
+	infoPaciente.DNI = *pacienteDB.Dni
+	infoPaciente.NroCelular = *pacienteDB.Telefono
+	infoPaciente.Genero = *pacienteDB.Genero
+	infoPaciente.DireccionVivienda = *pacienteDB.Direccion
+	infoPaciente.Ocupacion = pacienteDB.Ocupacion
 
 	//Obtener tipo de seguro
 	var pacienteAsegurado models.Asegurado
@@ -84,9 +84,9 @@ func GetCitaAndHistorial(c *gin.Context) {
 	}
 
 	//Llenar datos de paciente
-	citaHistorial.CitaDatos.NombrePaciente = citaDB.Paciente.Nombres
-	citaHistorial.CitaDatos.ApellidosPaciente = citaDB.Paciente.Apellido_paterno + " " + citaDB.Paciente.Apellido_materno
-	citaHistorial.CitaDatos.DNIPaciente = citaDB.Paciente.Dni
+	citaHistorial.CitaDatos.NombrePaciente = *citaDB.Paciente.Nombres
+	citaHistorial.CitaDatos.ApellidosPaciente = *citaDB.Paciente.Apellido_paterno + " " + *citaDB.Paciente.Apellido_materno
+	citaHistorial.CitaDatos.DNIPaciente = *citaDB.Paciente.Dni
 
 	// Llenar datos de la cita
 	citaHistorial.CitaDatos.Dia = citaDB.Fecha[0:10]

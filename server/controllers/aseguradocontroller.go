@@ -97,7 +97,7 @@ func CreateAsegurado(c *gin.Context) {
 	//Crear y agregar asegurado
 	var aseguradoBD models.Asegurado
 
-	aseguradoBD.DniAsegurado = paciente.Dni
+	aseguradoBD.DniAsegurado = *paciente.Dni
 	aseguradoBD.SeguroId = seguro.ID
 	aseguradoBD.FechaInscipcion = fechaInscripcion
 	aseguradoBD.FechaVencimiento = fechaCaducidad

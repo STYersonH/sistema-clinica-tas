@@ -3,6 +3,7 @@ package controllers
 import (
 	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/asterfy/tis-clinic/initializers"
 	"github.com/asterfy/tis-clinic/models"
@@ -65,11 +66,44 @@ func GetCitasCulminadasporDniPaciente(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": citas})
 }
+
+// Función para obtener un doctor aleatoriamente según id de especialidad
+func getRandomDoctorByIdEsp(idEspecialidad uint) models.Doctor {
+	var doctoresEspecialidad []models.Doctor
+	if result := initializers.DB.Where("especialidad_id = ?", idEspecialidad).Find(&doctoresEspecialidad); result.Error != nil {
+		return models.Doctor{}
+	}
+	if len(doctoresEspecialidad) == 0 {
+		if result := initializers.DB.Find(&doctoresEspecialidad); result.Error != nil {
+			return models.Doctor{}
+		}
+	}
+	return doctoresEspecialidad[rand.Intn(len(doctoresEspecialidad))]
+}
+
+// Función para validar la fecha de la cita
+func validarFechaCita(fecha string) bool {
+	const formato = "2006-01-02"
+	fechaProporcionada, err := time.Parse(formato, fecha)
+	if err != nil {
+		return false
+	}
+	fechaActual := time.Now().Truncate(24 * time.Hour)
+
+	return !fechaProporcionada.Before(fechaActual)
+}
+
 func CreateCita(c *gin.Context) {
 	//Extraer los datos del JSON
 	var citaJSON modelsApi.CitaGet
 	if err := c.ShouldBindJSON(&citaJSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	//Validar la fecha de la cita
+	if !validarFechaCita(citaJSON.Fecha) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "La fecha de la cita no es válida"})
 		return
 	}
 
@@ -81,23 +115,9 @@ func CreateCita(c *gin.Context) {
 	citaBD.Hora = citaJSON.Fecha + " " + citaJSON.Hora + ":" + citaJSON.Minuto + ":00"
 	citaBD.Estado = "programada"
 
-	var doctoresEspecialidad []models.Doctor
-	if result := initializers.DB.Where("especialidad_id = ?", citaBD.EspecialidadId).Find(&doctoresEspecialidad); result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
-		return
-	}
-	if len(doctoresEspecialidad) == 0 {
-		if result := initializers.DB.Find(&doctoresEspecialidad); result.Error != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})
-			return
-		}
-	}
-
-	var numerosLicencia []string
-	for _, doctor := range doctoresEspecialidad {
-		numerosLicencia = append(numerosLicencia, doctor.NumeroLicencia)
-	}
-	citaBD.LicenciaDoctor = numerosLicencia[rand.Intn(len(numerosLicencia))]
+	//Obtener un doctor aleatorio según la especialidad
+	var doctor models.Doctor = getRandomDoctorByIdEsp(citaBD.EspecialidadId)
+	citaBD.LicenciaDoctor = doctor.NumeroLicencia
 
 	if result := initializers.DB.Create(&citaBD); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error})

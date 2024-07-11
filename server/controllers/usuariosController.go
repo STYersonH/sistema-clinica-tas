@@ -43,15 +43,15 @@ func GetUser(c *gin.Context) {
 
 		var accountPacient modelsApi.InfoAccountPacient
 		accountPacient.IdPaciente = paciente.ID
-		accountPacient.Dni = paciente.Dni
-		accountPacient.Nombres = paciente.Nombres
-		accountPacient.Apellidos = paciente.Apellido_paterno + " " + paciente.Apellido_materno
-		accountPacient.Genero = paciente.Genero
-		accountPacient.Direccion = paciente.Direccion
-		accountPacient.CorreoElectronico = paciente.Email
-		accountPacient.Telefono = paciente.Telefono
-		accountPacient.FechaNacimiento = paciente.FechaNacimiento
-		accountPacient.Ocupacion = paciente.Ocupacion
+		accountPacient.Dni = *paciente.Dni
+		accountPacient.Nombres = *paciente.Nombres
+		accountPacient.Apellidos = *paciente.Apellido_paterno + " " + *paciente.Apellido_materno
+		accountPacient.Genero = *paciente.Genero
+		accountPacient.Direccion = *paciente.Direccion
+		accountPacient.CorreoElectronico = *paciente.Email
+		accountPacient.Telefono = *paciente.Telefono
+		accountPacient.FechaNacimiento = *paciente.FechaNacimiento
+		accountPacient.Ocupacion = *paciente.Ocupacion
 
 		c.JSON(200, gin.H{"data": accountPacient})
 	} else {

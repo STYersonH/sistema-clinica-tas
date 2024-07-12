@@ -6,22 +6,22 @@ type ReserveCitaGetService struct {
 }
 
 type DatosCitaGetService struct {
-	Fecha        string
-	Hora         string
-	Minuto       string
-	Especialidad string
-	Motivo       string
+	Fecha        *string
+	Hora         *string
+	Minuto       *string
+	Especialidad *string
+	Motivo       *string
 }
 
 type DatosPacienteGetService struct {
-	DniPaciente     string
-	Nombres         string
-	ApellidoPaterno string
-	ApellidoMaterno string
-	Genero          string
+	DniPaciente     *string
+	Nombres         *string
+	ApellidoPaterno *string
+	ApellidoMaterno *string
+	Genero          *string
 	Direccion       *string
 	Email           *string
-	Telefono        string
+	Telefono        *string
 	Ocupacion       *string
-	FechaNacimiento string
+	FechaNacimiento *string
 }

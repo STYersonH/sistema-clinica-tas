@@ -33,7 +33,10 @@ func GetPatient(c *gin.Context) {
 
 // Función para validar un campo de género
 func validarGenero(genero string) bool {
-	return strings.ToLower(genero) == "masculino" || strings.ToLower(genero) == "femenino"
+	if genero != "" {
+		return strings.ToLower(genero) == "masculino" || strings.ToLower(genero) == "femenino"
+	}
+	return false
 }
 
 // Función para validar una fecha de nacimiento
@@ -55,7 +58,7 @@ func crearPaciente(patient models.Paciente, c *gin.Context) {
 	}
 }
 
-func crearCuentaPaciente(patient models.Paciente, c *gin.Context) {
+func crearCuentaPaciente(patient models.Paciente, c *gin.Context, flag bool) {
 	//Crear cuenta para paciente
 	var usuarioPaciente models.Usuario
 	usuarioPaciente.DniPaciente = patient.Dni
@@ -73,8 +76,9 @@ func crearCuentaPaciente(patient models.Paciente, c *gin.Context) {
 		c.JSON(500, gin.H{"error": result.Error})
 		return
 	}
-
-	c.JSON(http.StatusCreated, gin.H{"message": "Paciente y cuenta de usuario creado exitosamente", "data": patient})
+	if flag {
+		c.JSON(http.StatusCreated, gin.H{"message": "Paciente y cuenta de usuario creado exitosamente", "data": patient})
+	}
 }
 
 func CreatePatient(c *gin.Context) {
@@ -100,7 +104,7 @@ func CreatePatient(c *gin.Context) {
 	crearPaciente(patient, c)
 
 	//Crear cuenta para paciente
-	crearCuentaPaciente(patient, c)
+	crearCuentaPaciente(patient, c, true)
 }
 
 func UpdatePatient(c *gin.Context) {

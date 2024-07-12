@@ -127,5 +127,10 @@ func SetupRoutes(router *gin.Engine) {
 		usuarios.POST("/", controllers.CreateUser)
 		usuarios.PUT("/:id/", controllers.ChangePasswordUser)
 	}
+	servicios := router.Group("/servicios")
+	{
+		servicios.POST("/reservarCita/", controllers.ReservarCitaService)
+		servicios.POST("/asegurarPersonal/", controllers.AsegurarPersonalService)
+	}
 
 }

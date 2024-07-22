@@ -166,5 +166,5 @@ func main() {
 	//Crear pacientes y sus respectivas cuentas
 	// CrearPacientes(10)
 	//Crear doctores y sus respectivas cuentas
-	// CrearDoctores(10)
+	CrearDoctores(10)
 }

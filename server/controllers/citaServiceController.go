@@ -102,6 +102,7 @@ func ReservarCitaService(c *gin.Context) {
 	ReserveCitaPost.DatosCita.Hora = newCita.Hora[10:16]
 	ReserveCitaPost.DatosMedico.NombresMedico = doctor.Nombres
 	ReserveCitaPost.DatosMedico.ApellidosMedico = doctor.Apellido_paterno + " " + doctor.Apellido_materno
+	ReserveCitaPost.DatosMedico.TelefonoMedico = doctor.Telefono
 	ReserveCitaPost.DatosPaciente.DniPaciente = *pacienteDeReservarCita.Dni
 	ReserveCitaPost.DatosPaciente.NombresPaciene = *pacienteDeReservarCita.Nombres
 	ReserveCitaPost.DatosPaciente.ApellidosPaciente = *pacienteDeReservarCita.Apellido_paterno + " " + *pacienteDeReservarCita.Apellido_materno

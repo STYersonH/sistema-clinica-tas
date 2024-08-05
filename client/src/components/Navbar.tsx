@@ -34,11 +34,13 @@ const Navbar = ({ color }: NavbarProps) => {
   const colorVariants = {
     yellow: "bg-yellow-primary",
     blue: "bg-blue-primary",
+    black: "bg-black",
   };
 
   const textColorVariants = {
     yellow: "text-yellow-primary",
     blue: "text-blue-primary",
+    black: "text-black",
   };
 
   return (

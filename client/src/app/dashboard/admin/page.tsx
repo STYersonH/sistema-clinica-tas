@@ -143,25 +143,19 @@ const MedicoPage = () => {
                 </div>
               </div>
             ) : (
-              <div className="relative flex h-[80%] flex-col items-center justify-center text-blue-primary">
+              <div className="flex h-[80%] flex-col items-center justify-center text-blue-primary">
                 <Image
                   src="/EmptyState.svg"
                   alt="empty state"
                   width={300}
                   height={300}
                 />
-                <p className="absolute bottom-[90px] text-xl">
+                <p className="absolute bottom-[270px] text-xl">
                   No hay citas pendientes
                 </p>
               </div>
             )}
           </div>
-          <Button
-            className="mb m-0 rounded-2xl bg-blue-primary hover:bg-blue-dark"
-            href="/dashboard/admin/comprarProductos"
-          >
-            COMPRAR PRODUCTOS DE TIENDA
-          </Button>
         </div>
       </div>
     </main>
